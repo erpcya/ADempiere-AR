@@ -1,0 +1,5 @@
+-- Aug 27, 2014 2:05:58 PM VET
+-- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
+CREATE TABLE HR_AttendanceRecord (AD_Client_ID NUMBER(10) NOT NULL, AD_Org_ID NUMBER(10) NOT NULL, Created DATE NOT NULL, CreatedBy NUMBER(10) NOT NULL, HR_AttendanceRecord_ID NUMBER(10) DEFAULT NULL , HR_Employee_ID NUMBER(10) DEFAULT NULL , IsActive CHAR(1) DEFAULT 'Y' CHECK (IsActive IN ('Y','N')) NOT NULL, T_DateTime DATE DEFAULT NULL , Updated DATE NOT NULL, UpdatedBy NUMBER(10) NOT NULL)
+;
+
