@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="base"/>
-	<classpathentry kind="src" path="patches"/>
+	<classpathentry kind="src" path="client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/adempiere_370"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/LVE-ADempiere"/>
