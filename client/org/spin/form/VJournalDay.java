@@ -17,13 +17,18 @@
 package org.spin.form;
 
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,6 +44,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.compiere.util.Trx;
 import org.spin.util.RangeSlider;
 
 /**
@@ -54,13 +60,13 @@ public class VJournalDay extends JournalDay
 	public void init(int WindowNo, FormFrame frame) {
 		
 		m_WindowNo = WindowNo;
-		//m_frame = frame;
+		//	m_frame = frame;
 		Env.setContext(Env.getCtx(), m_WindowNo, "IsSOTrx", "Y");   //  defaults to no
 		try
 		{
 			dyInit();
 			jbInit();
-			frame.getContentPane().add(mainPanel);
+			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 			
 		}
 		catch(Exception e)
@@ -71,80 +77,104 @@ public class VJournalDay extends JournalDay
 	/**	Window No			*/
 	private int         m_WindowNo = 0;
 	/**	FormFrame			*/
-	//private FormFrame 	m_frame;
-	
+	//	private FormFrame 	m_frame;
+	private BorderLayout 	mainLayout = new BorderLayout();
+
 	
 	private CPanel 		mainPanel    = new CPanel();
 	private CPanel 		northPanel   = new CPanel();
-	private CPanel		hourPanel	 = new CPanel();
 	private CPanel		rightPanel	 = new CPanel();
 	private CPanel		leftPanel	 = new CPanel();
 	private JSplitPane	detailPanel  = new JSplitPane();
-	private JLabel	 	conceptLabel = new JLabel();
-	private String	trxName = null;
+	private String		trxName = Trx.createTrxName("GM");
 	/** Journal */
-	private JLabel 		journalLabel = new JLabel();
+	private JLabel 		journalLabel  = new JLabel();
 	private VLookup 	journalSearch = null;
-	
-	
+	private CPanel		hoursPanel    = new CPanel();
+	private JLabel 		groupLabel  = new JLabel();
+	private JScrollPane scrollPane;
 	/** Save */
 	private JButton		bSave = new JButton();
-	
+
 	/** Incidence */
 
 
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
-		mainPanel.setPreferredSize(new Dimension(800,400));
+		mainPanel.setLayout(mainLayout);
 		//
 		journalLabel.setText(Msg.translate(Env.getCtx(), "Journal"));
-		
 		northPanel.add(journalSearch);
 		northPanel.add(bSave);
 		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
-	
-	    
-	    //	Label Concept
-	   
+		
+		
+	    //	Split Panel
 		detailPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		detailPanel.setBorder(BorderFactory.createEtchedBorder());
-		detailPanel.setPreferredSize(new Dimension(800,250));
-		detailPanel.setDividerLocation(150);
+		detailPanel.setPreferredSize(new Dimension(600,250));
+		detailPanel.setMinimumSize(new Dimension(600, 200));
 		detailPanel.setLeftComponent(leftPanel);
 		detailPanel.setRightComponent(rightPanel);
+		//	Scroll Panel
+		scrollPane = new JScrollPane(rightPanel,
+	            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+	            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		//	Slider Hours
-		for(int i = 1; i < 11; i++) {
-			
-			
-			RangeSlider hourSlider = new RangeSlider();
-			
-			hourSlider.setPreferredSize(new Dimension(240, hourSlider.getPreferredSize().height));
-			hourSlider.setMinimum(0);
-		    hourSlider.setMaximum(100);
-		    hourSlider.setValue(5);
-		    hourSlider.setUpperValue(23);
-
-			rightPanel.add(hourSlider);
-			}
-		mainPanel.add(northPanel);
-		mainPanel.add(detailPanel);
+		detailPanel.setRightComponent(scrollPane);
+		mainPanel.add(northPanel, BorderLayout.NORTH);
+		mainPanel.add(detailPanel, BorderLayout.CENTER);
 	}
 	public void dyInit() throws Exception{
-		//	Bussines Journal
+		//	GET Journal
 		int AD_Column_ID = 1000077;		//	C_Order.C_BPartner_ID
+		int count=1;
+		String nameGroup="";
 		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
+		hoursPanel.setBackground(Color.BLUE);
+		hoursPanel.setPreferredSize(new Dimension(1400, 15));
+	
+		rightPanel.setBackground(Color.BLACK);
+		leftPanel.setLayout(new GridBagLayout());
+		rightPanel.setLayout(new GridBagLayout());
+		hoursPanel.setLayout(new GridBagLayout());
+		rightPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		groupLabel.setText("Grupos de Incidencias:");
+		leftPanel.add(groupLabel, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
+			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+
+		for(int i = 0; i <= 24; i++){
+			JLabel hoursLabel = new JLabel();
+			hoursLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.black));
+			hoursLabel.setText(i+":00");
+			hoursLabel.setForeground(Color.WHITE);
+			hoursPanel.add(hoursLabel,new GridBagConstraints(i, 0, 1, 1, 1.0, 0.0
+			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(1, 1, 1, 1), 0, 0));
+		}
+
+		rightPanel.add(hoursPanel, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
+			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
 		
 		ArrayList<KeyNamePair> data = getIncidenceData(trxName);
-		//	Editar
-		for(KeyNamePair pp : data) {
-			JLabel groupInLabel = new JLabel();
-			groupInLabel.setText("1");
-			leftPanel.add(groupInLabel);
-		}
-		
-		
+			for(KeyNamePair pp : data) {
+				//	Add Label Incidence left Panel
+				nameGroup= pp.toString();
+				JLabel groupInLabel = new JLabel();
+				groupInLabel.setText(nameGroup);
+				leftPanel.add(groupInLabel, new GridBagConstraints(0, count, 1, 1, 0.0, 0.1
+							    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+				
+				//	Add Slider Hours rightPanel
+				RangeSlider hourSlider = new RangeSlider();
+				hourSlider.setMinimum(0);
+			    hourSlider.setMaximum(48);
+			    hourSlider.setValue(5);
+			    hourSlider.setUpperValue(23);
+				rightPanel.add(hourSlider, new GridBagConstraints(0, count, 0, 1, 0.0, 0.0
+								,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+				count++;
+		 	}
 	}
 	@Override
 	public void dispose() {

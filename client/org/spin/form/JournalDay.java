@@ -19,15 +19,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.logging.Level;
 
-import org.compiere.model.MPaymentBatch;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.eevolution.model.MHRPaySelectionCheck;
 
 /**
  * 
@@ -46,7 +42,7 @@ public class JournalDay
 	public String			m_PaymentExportClassHR = null;
 	
 	protected ArrayList<KeyNamePair> getIncidenceData(String trxName){
-		String sql = "SELECT Name from HR_IncidenceGroup";
+		String sql = "SELECT HR_IncidenceGroup_ID, Name from HR_IncidenceGroup";
 		return getData(sql, trxName);
 	}
 	 
@@ -61,8 +57,10 @@ public class JournalDay
 			//
 			while (rs.next()) {
 				data.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
+				
 			}
 			rs.close();
+			
 			pstmt.close();
 		} catch (SQLException e) {
 			log.log(Level.SEVERE, sql, e);
