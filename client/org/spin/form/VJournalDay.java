@@ -26,6 +26,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -128,42 +129,45 @@ public class VJournalDay extends JournalDay
 	public void dyInit() throws Exception{
 		//	GET Journal
 		int AD_Column_ID = 1000077;		//	C_Order.C_BPartner_ID
-		int count=1;
 		String nameGroup="";
 		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
 		hoursPanel.setBackground(Color.BLUE);
-		hoursPanel.setPreferredSize(new Dimension(1400, 15));
-	
-		rightPanel.setBackground(Color.BLACK);
-		leftPanel.setLayout(new GridBagLayout());
-		rightPanel.setLayout(new GridBagLayout());
+		hoursPanel.setPreferredSize(new Dimension(1600, 15));
+		hoursPanel.setMaximumSize(new Dimension(1600, 15));
+		leftPanel.setLayout(new BorderLayout()); 
+		leftPanel.setLayout(new BoxLayout(leftPanel,BoxLayout.Y_AXIS));
 		hoursPanel.setLayout(new GridBagLayout());
-		rightPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		rightPanel.setLayout(new BoxLayout(rightPanel,BoxLayout.Y_AXIS));
 		groupLabel.setText("Grupos de Incidencias:");
-		leftPanel.add(groupLabel, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		leftPanel.add(groupLabel);
 
 		for(int i = 0; i <= 24; i++){
-			JLabel hoursLabel = new JLabel();
+			JLabel hoursLabel = new JLabel(i+":00", JLabel.CENTER);
 			hoursLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.black));
-			hoursLabel.setText(i+":00");
 			hoursLabel.setForeground(Color.WHITE);
-			hoursPanel.add(hoursLabel,new GridBagConstraints(i, 0, 1, 1, 1.0, 0.0
-			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(1, 1, 1, 1), 0, 0));
+	
+			hoursLabel.setPreferredSize(new Dimension(60, 15));
+			hoursLabel.setMinimumSize(new Dimension(60, 15));
+			hoursLabel.setMaximumSize(new Dimension(60, 15));
+			
+			hoursPanel.add(hoursLabel,new GridBagConstraints(i, 0, 1, 0, 0.1, 0.0
+			    ,GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 		}
 
-		rightPanel.add(hoursPanel, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0
-			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+		rightPanel.add(hoursPanel);
 		
 		ArrayList<KeyNamePair> data = getIncidenceData(trxName);
+		
 			for(KeyNamePair pp : data) {
+
 				//	Add Label Incidence left Panel
 				nameGroup= pp.toString();
 				JLabel groupInLabel = new JLabel();
 				groupInLabel.setText(nameGroup);
-				leftPanel.add(groupInLabel, new GridBagConstraints(0, count, 1, 1, 0.0, 0.1
-							    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+				
+				leftPanel.add(groupInLabel);
 				
 				//	Add Slider Hours rightPanel
 				RangeSlider hourSlider = new RangeSlider();
@@ -171,9 +175,7 @@ public class VJournalDay extends JournalDay
 			    hourSlider.setMaximum(48);
 			    hourSlider.setValue(5);
 			    hourSlider.setUpperValue(23);
-				rightPanel.add(hourSlider, new GridBagConstraints(0, count, 0, 1, 0.0, 0.0
-								,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
-				count++;
+				rightPanel.add(hourSlider);
 		 	}
 	}
 	@Override
