@@ -41,8 +41,12 @@ public class JournalDay
 	/**	Export Class for Bank Account	*/
 	public String			m_PaymentExportClassHR = null;
 	
-	protected ArrayList<KeyNamePair> getIncidenceData(String trxName){
+	protected ArrayList<KeyNamePair> getGroupIncidenceData(String trxName){
 		String sql = "SELECT HR_IncidenceGroup_ID, Name from HR_IncidenceGroup";
+		return getData(sql, trxName);
+	}
+	protected ArrayList<KeyNamePair> getIncidenceData(String trxName, int incidence_ID){
+		String sql = "select * from HR_IGConcept,HR_Concept where hr_incidencegroup_ID="+incidence_ID+"and HR_IGConcept.HR_Concept_ID=HR_Concept.HR_Concept_ID";
 		return getData(sql, trxName);
 	}
 	 
