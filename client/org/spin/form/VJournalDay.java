@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -31,6 +32,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JToolTip;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -80,7 +82,7 @@ public class VJournalDay extends JournalDay
 	/**	FormFrame			*/
 	//	private FormFrame 	m_frame;
 	private BorderLayout 	mainLayout = new BorderLayout();
-
+	
 	
 	private CPanel 		mainPanel    = new CPanel();
 	private CPanel 		northPanel   = new CPanel();
@@ -96,9 +98,7 @@ public class VJournalDay extends JournalDay
 	private JScrollPane scrollPane;
 	/** Save */
 	private JButton		bSave = new JButton();
-
 	/** Incidence */
-
 
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
@@ -109,7 +109,7 @@ public class VJournalDay extends JournalDay
 		northPanel.add(bSave);
 		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
 		
-		
+	
 	    //	Split Panel
 		detailPanel.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 		detailPanel.setBorder(BorderFactory.createEtchedBorder());
@@ -145,9 +145,8 @@ public class VJournalDay extends JournalDay
 
 		for(int i = 0; i <= 24; i++){
 			JLabel hoursLabel = new JLabel(i+":00", JLabel.CENTER);
-			hoursLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, Color.black));
+			hoursLabel.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.black));
 			hoursLabel.setForeground(Color.WHITE);
-	
 			hoursLabel.setPreferredSize(new Dimension(60, 15));
 			hoursLabel.setMinimumSize(new Dimension(60, 15));
 			hoursLabel.setMaximumSize(new Dimension(60, 15));
@@ -158,31 +157,41 @@ public class VJournalDay extends JournalDay
 
 		rightPanel.add(hoursPanel);
 		
-		ArrayList<KeyNamePair> data = getIncidenceData(trxName);
+		ArrayList<KeyNamePair> dataG = getGroupIncidenceData(trxName);
 		
-			for(KeyNamePair pp : data) {
-
+			for(KeyNamePair pp : dataG) {
+				
 				//	Add Label Incidence left Panel
 				nameGroup= pp.toString();
+				
 				JLabel groupInLabel = new JLabel();
 				groupInLabel.setText(nameGroup);
-				
 				leftPanel.add(groupInLabel);
 				
 				//	Add Slider Hours rightPanel
+				ArrayList<KeyNamePair> dataI = getIncidenceData(trxName,pp.getKey());
 				RangeSlider hourSlider = new RangeSlider();
 				hourSlider.setMinimum(0);
 			    hourSlider.setMaximum(48);
 			    hourSlider.setValue(5);
 			    hourSlider.setUpperValue(23);
-				rightPanel.add(hourSlider);
+			    hourSlider.setToolTipText(""+hourSlider.getValue());
+			    rightPanel.add(hourSlider);
+			   
 		 	}
+			
+	}
+	public void actionPerformed(ActionEvent e)
+	{
+			
+				
 	}
 	@Override
 	public void dispose() {
 		
 
 	}
+	
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		
