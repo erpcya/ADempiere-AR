@@ -42,14 +42,13 @@ public class JournalDay
 	public String			m_PaymentExportClassHR = null;
 	
 	protected ArrayList<KeyNamePair> getGroupIncidenceData(String trxName){
-		String sql = "SELECT HR_IncidenceGroup_ID, Name from HR_IncidenceGroup";
+		String sql = "SELECT igc.HR_IncidenceGroup_ID, c.Name FROM " +
+				"HR_IGConcept as igc " +
+				"INNER Join HR_IncidenceGroup as ig on(ig.HR_IncidenceGroup_ID = igc.HR_IncidenceGroup_ID) " +
+				"INNER JOIN HR_Concept as c  on(c.HR_Concept_ID = igc.HR_Concept_ID)";
 		return getData(sql, trxName);
 	}
-	protected ArrayList<KeyNamePair> getIncidenceData(String trxName, int incidence_ID){
-		String sql = "select * from HR_IGConcept,HR_Concept where hr_incidencegroup_ID="+incidence_ID+"and HR_IGConcept.HR_Concept_ID=HR_Concept.HR_Concept_ID";
-		return getData(sql, trxName);
-	}
-	 
+	
 	private ArrayList<KeyNamePair> getData(String sql, String trxName){
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
 		
