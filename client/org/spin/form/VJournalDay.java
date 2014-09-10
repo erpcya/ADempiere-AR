@@ -20,19 +20,24 @@ package org.spin.form;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JToolTip;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -55,7 +60,7 @@ import org.spin.util.RangeSlider;
  *
  */
 public class VJournalDay extends JournalDay
-			implements FormPanel, ChangeListener {
+			implements FormPanel, ChangeListener,ActionListener,MouseListener {
 
 	
 		
@@ -82,8 +87,9 @@ public class VJournalDay extends JournalDay
 	/**	FormFrame			*/
 	//	private FormFrame 	m_frame;
 	private BorderLayout 	mainLayout = new BorderLayout();
-	
-	
+	JCheckBox[] conceptBox;
+	RangeSlider[] hourSlider;
+	JPanel[] sliderPanel;
 	private CPanel 		mainPanel    = new CPanel();
 	private CPanel 		northPanel   = new CPanel();
 	private CPanel		rightPanel	 = new CPanel();
@@ -129,12 +135,11 @@ public class VJournalDay extends JournalDay
 	public void dyInit() throws Exception{
 		//	GET Journal
 		int AD_Column_ID = 1000077;		//	C_Order.C_BPartner_ID
-		String nameGroup="";
+
 		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
 		hoursPanel.setBackground(Color.BLUE);
-		hoursPanel.setPreferredSize(new Dimension(1600, 15));
-		hoursPanel.setMaximumSize(new Dimension(1600, 15));
+		hoursPanel.setMaximumSize(new Dimension(120*24, 15));
 		leftPanel.setLayout(new BorderLayout()); 
 		leftPanel.setLayout(new BoxLayout(leftPanel,BoxLayout.Y_AXIS));
 		hoursPanel.setLayout(new GridBagLayout());
@@ -144,59 +149,133 @@ public class VJournalDay extends JournalDay
 		leftPanel.add(groupLabel);
 
 		for(int i = 0; i <= 24; i++){
-			JLabel hoursLabel = new JLabel(i+":00", JLabel.CENTER);
-			hoursLabel.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, Color.black));
+			JLabel hoursLabel = new JLabel("",JLabel.CENTER);
+			if(i < 10)
+				hoursLabel.setText("0"+i+":00");
+			else 
+				hoursLabel.setText(i+":00");
+	
+			hoursLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.black));
 			hoursLabel.setForeground(Color.WHITE);
-			hoursLabel.setPreferredSize(new Dimension(60, 15));
-			hoursLabel.setMinimumSize(new Dimension(60, 15));
-			hoursLabel.setMaximumSize(new Dimension(60, 15));
+			hoursLabel.setFont(new Font("SanSerif", Font.PLAIN, 14));
+			hoursLabel.setPreferredSize(new Dimension(120, 15));
+			hoursLabel.setMinimumSize(new Dimension(120, 15));
+			hoursLabel.setMaximumSize(new Dimension(120, 15));
 			
-			hoursPanel.add(hoursLabel,new GridBagConstraints(i, 0, 1, 0, 0.1, 0.0
-			    ,GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			hoursPanel.add(hoursLabel,new GridBagConstraints(i, 0, 1, 0, 0.0, 0.0
+			    ,GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		}
 
 		rightPanel.add(hoursPanel);
+		addItems();
 		
-		ArrayList<KeyNamePair> dataG = getGroupIncidenceData(trxName);
-		
-			for(KeyNamePair pp : dataG) {
-				
-				//	Add Label Incidence left Panel
-				nameGroup= pp.toString();
-				
-				JLabel groupInLabel = new JLabel();
-				groupInLabel.setText(nameGroup);
-				leftPanel.add(groupInLabel);
-				
-				//	Add Slider Hours rightPanel
-				ArrayList<KeyNamePair> dataI = getIncidenceData(trxName,pp.getKey());
-				RangeSlider hourSlider = new RangeSlider();
-				hourSlider.setMinimum(0);
-			    hourSlider.setMaximum(48);
-			    hourSlider.setValue(5);
-			    hourSlider.setUpperValue(23);
-			    hourSlider.setToolTipText(""+hourSlider.getValue());
-			    rightPanel.add(hourSlider);
-			   
-		 	}
 			
 	}
-	public void actionPerformed(ActionEvent e)
-	{
+	
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 10/09/2014, 09:21:46
+	 * @return void
+	 */
+	public void addItems() {
+		int i=0;
+		int n_Hour = 24;
+		int s_Hour = 100;
+		int s_division = 5;
+		int s_Conv_Hour = s_Hour/s_division;
+		int s_Slider = s_Conv_Hour*n_Hour;
+		
+		ArrayList<KeyNamePair> data = getGroupIncidenceData(trxName);
+		conceptBox = new JCheckBox[data.size()];
+		hourSlider = new RangeSlider[data.size()];
+		sliderPanel = new JPanel[data.size()];
+		for(KeyNamePair pp : data) {
 			
+				conceptBox[i]  = new JCheckBox(pp.toString(), true);
+			    hourSlider[i]  = new RangeSlider();
+			    sliderPanel[i] = new JPanel();
+			    
+				conceptBox[i].addActionListener(this);
+			    conceptBox[i].setMaximumSize(new Dimension(150, 15));
+			    
+				hourSlider[i].setMinimum(0);
+			    hourSlider[i].setMaximum(s_Slider);
+			    hourSlider[i].setValue(30);
+			    hourSlider[i].setUpperValue(50);
+			    hourSlider[i].setToolTipText(""+hourSlider[i].getValue()+"-"+hourSlider[i].getUpperValue());
+			    hourSlider[i].addMouseListener(this);
+			    sliderPanel[i].setLayout(new BoxLayout(sliderPanel[i],BoxLayout.Y_AXIS));
+			    sliderPanel[i].setMaximumSize(new Dimension(120*24, 15));
+			    sliderPanel[i].add(hourSlider[i]);
+			    //	Add Label Cocept rightPanel
+			    leftPanel.add(conceptBox[i]);
+			    //	Add Slider Hours rightPanel
+			    rightPanel.add(sliderPanel[i]);		   
+			    i++;
+		}
+		
+	}	  
+	  @Override
+	  public void mousePressed(MouseEvent e) {
+		  int count=conceptBox.length;
+
+			for(int i = 0; i < count; i++){
+				if(hourSlider[i].getValue()/200 < 10)
+					hourSlider[i].setToolTipText("0"+hourSlider[i].getValue()+":00-"+hourSlider[i].getUpperValue()+":00");
+				else
+					hourSlider[i].setToolTipText(""+hourSlider[i].getValue()+":00-"+hourSlider[i].getUpperValue()+":00");
+			}
+	    }
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		int count=conceptBox.length;
+		for(int i = 0; i < count; i++){
+			if(hourSlider[i].getValue()/2 < 10)
+				hourSlider[i].setToolTipText("0"+hourSlider[i].getValue()+"-"+hourSlider[i].getUpperValue());
+			else
+				hourSlider[i].setToolTipText(""+hourSlider[i].getValue()+":00-"+hourSlider[i].getUpperValue()+":00");
+		}
+	}
+	public void actionPerformed(ActionEvent e){
+		int count=conceptBox.length;
+		for(int i = 0; i < count; i++){
+			if(conceptBox[i].isSelected()) {
+				hourSlider[i].setVisible(true);
 				
+			}
+			else {
+				hourSlider[i].setVisible(false);
+			}
+			
+		}
 	}
 	@Override
 	public void dispose() {
 		
 
 	}
-	
 	@Override
-	public void stateChanged(ChangeEvent e) {
-		
+	public void mouseClicked(MouseEvent e) {
+	
 		
 	}
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	
+		
+	}
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent e) {
+
+		
+	}
+	
 	
 
 }
