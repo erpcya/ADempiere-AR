@@ -72,7 +72,7 @@ public class VJournalDay extends JournalDay
 	public void init(int WindowNo, FormFrame frame) {
 		
 		m_WindowNo = WindowNo;
-		//	m_frame = frame;
+			m_frame = frame;
 		Env.setContext(Env.getCtx(), m_WindowNo, "IsSOTrx", "Y");   //  defaults to no
 		try
 		{
@@ -89,7 +89,7 @@ public class VJournalDay extends JournalDay
 	/**	Window No			*/
 	private int         m_WindowNo = 0;
 	/**	FormFrame			*/
-	//	private FormFrame 	m_frame;
+		private FormFrame 	m_frame;
 	private BorderLayout 	mainLayout = new BorderLayout();
 	JCheckBox[] conceptBox;
 	JButton[] h_IncidenceButton;
@@ -132,7 +132,7 @@ public class VJournalDay extends JournalDay
 	private JPanel editHourPanel = new JPanel();
 	private int s_IncideceButton;
 	private int aux =0 ;
-    private JFrame f7;
+    private JDialog f7;
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
@@ -212,13 +212,12 @@ public class VJournalDay extends JournalDay
 			hoursLabel.setPreferredSize(new Dimension(s_Hour, 15));
 			hoursLabel.setMinimumSize(new Dimension(s_Hour, 15));
 			hoursLabel.setMaximumSize(new Dimension(s_Hour, 15));
-			
 			hoursPanel.add(hoursLabel);
 		}
 
 		rightPanel.add(hoursPanel);
 		addItems();
-//		f7 = new JFrame("Classics (excluded frame)");
+//		f7 = new JDialog(m_frame, true);
 //		f7.setBounds(150,200  - 200 - 32, 300, 200);
 //	       
 //	      
