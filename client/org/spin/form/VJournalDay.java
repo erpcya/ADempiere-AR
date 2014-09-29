@@ -30,6 +30,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -67,7 +71,7 @@ import org.compiere.util.Trx;
  *
  */
 public class VJournalDay extends JournalDay
-			implements FormPanel, ChangeListener,ActionListener,MouseListener {
+			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener {
 
 	
 	@Override
@@ -105,6 +109,11 @@ public class VJournalDay extends JournalDay
 	/** Journal */
 	private JLabel 		journalLabel  = new JLabel();
 	private VLookup 	journalSearch = null;
+	private JLabel		s_SlotLabel	 = new JLabel();
+	private JLabel		e_SlotLabel	 = new JLabel();
+	private JTextField		s_SlotButton = new JTextField(10);
+	private JTextField		e_SlotButton = new JTextField(10);
+	
 	private CPanel		hoursPanel    = new CPanel();
 	private JLabel 		groupLabel  = new JLabel();
 	private JScrollPane scrollPane;
@@ -131,6 +140,7 @@ public class VJournalDay extends JournalDay
 	private JLabel s_MinLabel = new JLabel();
 	private JLabel e_HourLabel = new JLabel();
 	private JLabel e_MinLabel = new JLabel();
+
 	private int s_IncideceButton;
 	private int aux = 0;
 	
@@ -139,9 +149,17 @@ public class VJournalDay extends JournalDay
 		mainPanel.setLayout(mainLayout);
 		//	North Panel
 		journalLabel.setText(Msg.translate(Env.getCtx(), "Journal"));
+		
 		northPanel.add(journalSearch);
 		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
 		northPanel.add(bSave);
+		s_SlotLabel.setText("Inicio Hora Descanso");
+		e_SlotLabel.setText("Fin Hora Descanso");
+		northPanel.add(s_SlotLabel);
+		northPanel.add(s_SlotButton);
+		northPanel.add(e_SlotLabel);
+		northPanel.add(e_SlotButton);
+		
 		
 		//	Hour Edit frame
 		hour_Dialog = new JDialog(m_frame, true);
@@ -210,6 +228,7 @@ public class VJournalDay extends JournalDay
 		
 		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
+		journalSearch.addVetoableChangeListener(this);
 		hoursPanel.setBackground(Color.BLUE);
 		hoursPanel.setMaximumSize(new Dimension(s_Hour*25, 15));
 		leftPanel.setLayout(new BorderLayout()); 
@@ -275,7 +294,7 @@ public class VJournalDay extends JournalDay
 	}
 
 /**
- * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>
+ * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>29/09/2014, 09:21:46
  *
  */
 public void addPanelHour(int i) {
@@ -311,7 +330,8 @@ public void addPanelHour(int i) {
 	}
 	
 	public void actionPerformed(ActionEvent e){
-		int count=conceptBox.length;     
+		int count=conceptBox.length;
+		
 		for(int i = 0;  i< count; i++ ){
 			if(e.getActionCommand().equals(h_IncidenceButton[i].getText())){
 				aux=i;
@@ -377,6 +397,19 @@ public void addPanelHour(int i) {
 			}
 		}
 		
+	}	protected int 				m_HR_Journal = 0;
+
+	@Override
+	public void vetoableChange(PropertyChangeEvent evt)
+			throws PropertyVetoException {
+
+	
+		if(evt.getSource().equals(journalSearch)){
+			m_HR_Journal_ID=(Integer) journalSearch.getValue();
+			setTime(m_HR_Journal_ID,trxName);
+			s_SlotButton.setText(m_startTime.toString());
+			e_SlotButton.setText(m_endTime.toString());
+		}
 	}
 	
 	

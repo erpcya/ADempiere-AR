@@ -31,7 +31,7 @@ public interface I_HR_Journal
     /** TableName=HR_Journal */
     public static final String Table_Name = "HR_Journal";
 
-    /** AD_Table_ID=1000009 */
+    /** AD_Table_ID=1000013 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -92,6 +92,19 @@ public interface I_HR_Journal
 	  */
 	public String getDescription();
 
+    /** Column name EndTime */
+    public static final String COLUMNNAME_EndTime = "EndTime";
+
+	/** Set End Time.
+	  * End of the time span
+	  */
+	public void setEndTime (Timestamp EndTime);
+
+	/** Get End Time.
+	  * End of the time span
+	  */
+	public Timestamp getEndTime();
+
     /** Column name HR_Journal_ID */
     public static final String COLUMNNAME_HR_Journal_ID = "HR_Journal_ID";
 
@@ -126,6 +139,45 @@ public interface I_HR_Journal
 	  * Alphanumeric identifier of the entity
 	  */
 	public String getName();
+
+    /** Column name StartTime */
+    public static final String COLUMNNAME_StartTime = "StartTime";
+
+	/** Set Start Time.
+	  * Time started
+	  */
+	public void setStartTime (Timestamp StartTime);
+
+	/** Get Start Time.
+	  * Time started
+	  */
+	public Timestamp getStartTime();
+
+    /** Column name TimeSlotEnd */
+    public static final String COLUMNNAME_TimeSlotEnd = "TimeSlotEnd";
+
+	/** Set Slot End.
+	  * Time when timeslot ends
+	  */
+	public void setTimeSlotEnd (Timestamp TimeSlotEnd);
+
+	/** Get Slot End.
+	  * Time when timeslot ends
+	  */
+	public Timestamp getTimeSlotEnd();
+
+    /** Column name TimeSlotStart */
+    public static final String COLUMNNAME_TimeSlotStart = "TimeSlotStart";
+
+	/** Set Slot Start.
+	  * Time when timeslot starts
+	  */
+	public void setTimeSlotStart (Timestamp TimeSlotStart);
+
+	/** Get Slot Start.
+	  * Time when timeslot starts
+	  */
+	public Timestamp getTimeSlotStart();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

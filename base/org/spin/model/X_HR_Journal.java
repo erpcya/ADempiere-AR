@@ -18,6 +18,7 @@
 package org.spin.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
@@ -31,7 +32,7 @@ public class X_HR_Journal extends PO implements I_HR_Journal, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140901L;
+	private static final long serialVersionUID = 20140929L;
 
     /** Standard Constructor */
     public X_HR_Journal (Properties ctx, int HR_Journal_ID, String trxName)
@@ -39,8 +40,11 @@ public class X_HR_Journal extends PO implements I_HR_Journal, I_Persistent
       super (ctx, HR_Journal_ID, trxName);
       /** if (HR_Journal_ID == 0)
         {
-			setDescription (null);
+			setEndTime (new Timestamp( System.currentTimeMillis() ));
 			setName (null);
+			setStartTime (new Timestamp( System.currentTimeMillis() ));
+			setTimeSlotEnd (new Timestamp( System.currentTimeMillis() ));
+			setTimeSlotStart (new Timestamp( System.currentTimeMillis() ));
 			setValue (null);
         } */
     }
@@ -90,14 +94,31 @@ public class X_HR_Journal extends PO implements I_HR_Journal, I_Persistent
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set End Time.
+		@param EndTime 
+		End of the time span
+	  */
+	public void setEndTime (Timestamp EndTime)
+	{
+		set_Value (COLUMNNAME_EndTime, EndTime);
+	}
+
+	/** Get End Time.
+		@return End of the time span
+	  */
+	public Timestamp getEndTime () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_EndTime);
+	}
+
 	/** Set Journal.
 		@param HR_Journal_ID Journal	  */
 	public void setHR_Journal_ID (int HR_Journal_ID)
 	{
 		if (HR_Journal_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_HR_Journal_ID, null);
+			set_Value (COLUMNNAME_HR_Journal_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_HR_Journal_ID, Integer.valueOf(HR_Journal_ID));
+			set_Value (COLUMNNAME_HR_Journal_ID, Integer.valueOf(HR_Journal_ID));
 	}
 
 	/** Get Journal.
@@ -125,6 +146,57 @@ public class X_HR_Journal extends PO implements I_HR_Journal, I_Persistent
 	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set Start Time.
+		@param StartTime 
+		Time started
+	  */
+	public void setStartTime (Timestamp StartTime)
+	{
+		set_Value (COLUMNNAME_StartTime, StartTime);
+	}
+
+	/** Get Start Time.
+		@return Time started
+	  */
+	public Timestamp getStartTime () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_StartTime);
+	}
+
+	/** Set Slot End.
+		@param TimeSlotEnd 
+		Time when timeslot ends
+	  */
+	public void setTimeSlotEnd (Timestamp TimeSlotEnd)
+	{
+		set_Value (COLUMNNAME_TimeSlotEnd, TimeSlotEnd);
+	}
+
+	/** Get Slot End.
+		@return Time when timeslot ends
+	  */
+	public Timestamp getTimeSlotEnd () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_TimeSlotEnd);
+	}
+
+	/** Set Slot Start.
+		@param TimeSlotStart 
+		Time when timeslot starts
+	  */
+	public void setTimeSlotStart (Timestamp TimeSlotStart)
+	{
+		set_Value (COLUMNNAME_TimeSlotStart, TimeSlotStart);
+	}
+
+	/** Get Slot Start.
+		@return Time when timeslot starts
+	  */
+	public Timestamp getTimeSlotStart () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_TimeSlotStart);
 	}
 
 	/** Set Search Key.

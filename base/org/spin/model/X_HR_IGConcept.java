@@ -30,7 +30,7 @@ public class X_HR_IGConcept extends PO implements I_HR_IGConcept, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140901L;
+	private static final long serialVersionUID = 20140929L;
 
     /** Standard Constructor */
     public X_HR_IGConcept (Properties ctx, int HR_IGConcept_ID, String trxName)
@@ -38,7 +38,6 @@ public class X_HR_IGConcept extends PO implements I_HR_IGConcept, I_Persistent
       super (ctx, HR_IGConcept_ID, trxName);
       /** if (HR_IGConcept_ID == 0)
         {
-			setHR_Concept_ID (0);
         } */
     }
 
@@ -80,9 +79,9 @@ public class X_HR_IGConcept extends PO implements I_HR_IGConcept, I_Persistent
 	public void setHR_Concept_ID (int HR_Concept_ID)
 	{
 		if (HR_Concept_ID < 1) 
-			set_Value (COLUMNNAME_HR_Concept_ID, null);
+			set_ValueNoCheck (COLUMNNAME_HR_Concept_ID, null);
 		else 
-			set_Value (COLUMNNAME_HR_Concept_ID, Integer.valueOf(HR_Concept_ID));
+			set_ValueNoCheck (COLUMNNAME_HR_Concept_ID, Integer.valueOf(HR_Concept_ID));
 	}
 
 	/** Get Payroll Concept.
@@ -105,9 +104,9 @@ public class X_HR_IGConcept extends PO implements I_HR_IGConcept, I_Persistent
 	public void setHR_IncidenceGroup_ID (int HR_IncidenceGroup_ID)
 	{
 		if (HR_IncidenceGroup_ID < 1) 
-			set_Value (COLUMNNAME_HR_IncidenceGroup_ID, null);
+			set_ValueNoCheck (COLUMNNAME_HR_IncidenceGroup_ID, null);
 		else 
-			set_Value (COLUMNNAME_HR_IncidenceGroup_ID, Integer.valueOf(HR_IncidenceGroup_ID));
+			set_ValueNoCheck (COLUMNNAME_HR_IncidenceGroup_ID, Integer.valueOf(HR_IncidenceGroup_ID));
 	}
 
 	/** Get Incidence Group.
