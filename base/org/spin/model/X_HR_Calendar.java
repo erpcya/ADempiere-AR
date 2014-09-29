@@ -31,7 +31,7 @@ public class X_HR_Calendar extends PO implements I_HR_Calendar, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140901L;
+	private static final long serialVersionUID = 20140929L;
 
     /** Standard Constructor */
     public X_HR_Calendar (Properties ctx, int HR_Calendar_ID, String trxName)
@@ -39,7 +39,6 @@ public class X_HR_Calendar extends PO implements I_HR_Calendar, I_Persistent
       super (ctx, HR_Calendar_ID, trxName);
       /** if (HR_Calendar_ID == 0)
         {
-			setName (null);
         } */
     }
 

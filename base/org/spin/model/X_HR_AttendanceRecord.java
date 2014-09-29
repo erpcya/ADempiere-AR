@@ -31,7 +31,7 @@ public class X_HR_AttendanceRecord extends PO implements I_HR_AttendanceRecord, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140901L;
+	private static final long serialVersionUID = 20140929L;
 
     /** Standard Constructor */
     public X_HR_AttendanceRecord (Properties ctx, int HR_AttendanceRecord_ID, String trxName)

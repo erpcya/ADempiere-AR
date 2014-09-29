@@ -30,7 +30,7 @@ public class X_HR_JournalDay extends PO implements I_HR_JournalDay, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140901L;
+	private static final long serialVersionUID = 20140929L;
 
     /** Standard Constructor */
     public X_HR_JournalDay (Properties ctx, int HR_JournalDay_ID, String trxName)
