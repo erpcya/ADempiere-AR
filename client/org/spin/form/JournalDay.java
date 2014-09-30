@@ -26,6 +26,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
+import org.spin.model.MHRIncidenceGroup;
 import org.spin.model.MHRJournal;
 
 /**
@@ -39,9 +40,18 @@ public class JournalDay
 	/**	Window No			*/
 	public int         		m_WindowNo = 0;
 
-	protected int 			m_HR_Journal_ID = 0;
-	protected Timestamp m_startTime = null;
-	protected Timestamp m_endTime = null;
+	protected int 			m_HR_Journal_ID 		= 0;
+	protected int			m_HR_IncidenceGroup_ID  = 0;
+	/** Red Color			*/
+	protected int 			m_R 					= 0;
+	/** Green Color			*/
+	protected int 			m_G 					= 0;
+	/** Blue Color			*/
+	protected int 			m_B 					= 0;
+	/** Start Time			*/
+	protected Timestamp 	m_startTime 			= null;
+	/** End Time			*/
+	protected Timestamp 	m_endTime 				= null;
 	/**	Logger			*/
 	public static CLogger log = CLogger.getCLogger(JournalDay.class);
 	/**	Export Class for Bank Account	*/
@@ -69,6 +79,13 @@ public class JournalDay
 			m_endTime = getEndTime(p_HR_Journal,trxName);
 		} 
 	}
+	protected void setRGB(int p_HR_IncidenceGroup, String trxName){
+	
+			m_R = getRColor(p_HR_IncidenceGroup,trxName);
+			m_G = getGColor(p_HR_IncidenceGroup,trxName);
+			m_B = getBColor(p_HR_IncidenceGroup,trxName);
+		 	
+	}
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:02
@@ -82,6 +99,45 @@ public class JournalDay
 				"HR_Journal " +
 				"Where HR_Journal_ID = ?", p_HR_Journal);
 		
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
+	 * @param p_HR_IncidenceGroup
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getRColor(int p_HR_IncidenceGroup, String trxName){
+		return DB.getSQLValue(trxName, "SELECT red FROM " +
+				"HR_IncidenceGroup " +
+				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
+	 * @param p_HR_IncidenceGroup
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getGColor(int p_HR_IncidenceGroup, String trxName){
+		return DB.getSQLValue(trxName, "SELECT green FROM " +
+				"HR_IncidenceGroup " +
+				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
+	 * @param p_HR_IncidenceGroup
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getBColor(int p_HR_IncidenceGroup, String trxName){
+		return DB.getSQLValue(trxName, "SELECT blue FROM " +
+				"HR_IncidenceGroup " +
+				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
 	}
 	/**
 	 * 
