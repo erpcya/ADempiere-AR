@@ -33,7 +33,10 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
+import java.util.Calendar;
+
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -47,6 +50,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
@@ -73,7 +77,6 @@ import org.compiere.util.Trx;
 public class VJournalDay extends JournalDay
 			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener {
 
-	
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
 		
@@ -85,7 +88,6 @@ public class VJournalDay extends JournalDay
 			dyInit();
 			jbInit();
 			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
-			
 		}
 		catch(Exception e)
 		{
@@ -97,79 +99,95 @@ public class VJournalDay extends JournalDay
 	/**	FormFrame			*/
 		private FormFrame 	m_frame;
 	private BorderLayout 	mainLayout = new BorderLayout();
-	JCheckBox[] conceptBox;
-	JButton[] h_IncidenceButton;
-	JButton[] a_IncidenceButton;
-	JPanel[] sliderPanel;
-	JPanel[] hPanel;
-	private CPanel 		mainPanel    = new CPanel();
-	private CPanel 		northPanel   = new CPanel();
-	private CPanel		rightPanel	 = new CPanel();
-	private CPanel		leftPanel	 = new CPanel();
-	private JSplitPane	detailPanel  = new JSplitPane();
-	private String		trxName = Trx.createTrxName("GM");
-	/** Journal */
-	private JLabel 		journalLabel  = new JLabel();
-	private VLookup 	journalSearch = null;
-	private JLabel		s_SlotLabel	 = new JLabel();
-	private JLabel		e_SlotLabel	 = new JLabel();
-	private JTextField		s_SlotButton = new JTextField(5);
-	private JTextField		e_SlotButton = new JTextField(5);
-	
-	private CPanel		hoursPanel    = new CPanel();
-	private JLabel 		groupLabel  = new JLabel();
+	/** Arrays for Line Journal */
+	private JCheckBox[] conceptBox;
+	private JButton[] 	h_IncidenceButton;
+	private JButton[] 	a_IncidenceButton;
+	private JPanel[] 	sliderPanel;
+	private JPanel[] 	hPanel;
+	private int[] 		HR_Incidence;
+	/** 						*/
+	private CPanel 		mainPanel    	 = new CPanel();
+	private CPanel 		northPanel   	 = new CPanel();
+	private CPanel		rightPanel	 	 = new CPanel();
+	private CPanel		leftPanel	 	 = new CPanel();
+	private CPanel		hoursPanel    	 = new CPanel();
+	private JSplitPane	detailPanel  	 = new JSplitPane();
+	private String		trxName 		 = Trx.createTrxName("GM");
+	/** Journal 				*/
+	private JLabel 		journalLabel     = new JLabel();
+	private VLookup 	journalSearch    = null;
+	/** Hours Slot 				*/
+	private JLabel		s_SlotLabel	     = new JLabel();
+	private JLabel		e_SlotLabel	     = new JLabel();
+	private JTextField	s_SlotButton 	= new JTextField(5);
+	private JTextField	e_SlotButton 	= new JTextField(5);
+
+	/**	Group Incidence			*/
+	private JLabel 		groupLabel  	 = new JLabel();
 	private JScrollPane scrollPane;
 	/** Save */
-	private JButton		bSave = new JButton();
-	/** Incidence */
-	static final int N_HOUR = 24;
-	static final int N_MIN  = 60;
-	private int s_Hour      = 120;
-	private int start_Hour  = 1;
-	private int start_Min  	= 1;
-	private int end_Hour 	= 1;
-	private int end_Min 	= 1;
-    private JDialog hour_Dialog;
-	/** Item JDialog */
-	private JButton s_HourButton = new JButton();
-	private JButton c_HourButton = new JButton();
+	private JButton		bSave 			 = new JButton();
+	private JDialog 	hour_Dialog;
+	/** Label Title 			*/
 	private JLabel title_Label = new JLabel();
-	private JLabel s_HourLabel = new JLabel();
-	private JLabel s_MinLabel = new JLabel();
-	private JLabel e_HourLabel = new JLabel();
-	private JLabel e_MinLabel = new JLabel();
-	private CComboBox s_HourList = new CComboBox();
-	private CComboBox e_HourList = new CComboBox();
-	private CComboBox s_MinList = new CComboBox();
-	private CComboBox e_MinList = new CComboBox();
-	private int s_IncideceButton;
-	private int aux = 0;
-	private int total = 0;
-	private int[] HR_Incidence;
+	/**  Start Slot Hour 		*/    
+    private JLabel 		s_HourLabel 	 = new JLabel();
+	private CComboBox 	s_HourList 		 = new CComboBox();
+	/**  Start Slot Min 		*/
+	private JLabel 		s_MinLabel 	  	 = new JLabel();
+	private CComboBox 	s_MinList 		 = new CComboBox();
+	/**  End Slot Hour 			*/
+	private JLabel 		e_HourLabel		 = new JLabel();
+	private CComboBox 	e_HourList 		 = new CComboBox();
+	/**  End Slot Min 			*/
+	private JLabel 		e_MinLabel		 = new JLabel();
+	private CComboBox 	e_MinList 		 = new CComboBox();
+	/**  Save Slot Button 		*/
+    private JButton 	s_HourButton	 = new JButton();
+	private JButton 	c_HourButton	 = new JButton();
+	/**  Save Slot Button 		*/
+	private int 		s_IncideceButton = 0;
+	private int 		aux 			 = 0;
+	/**  Total Button 		*/
+	private int 		t_Button  		 = 0;
+	/** Incidence */
+	static final int 	N_HOUR 			 = 24;
+	static final int 	N_MIN  			 = 60;
+	private int 		s_Hour      	 = 120;
+	private int 		start_Hour  	 = 1;
+	private int 		start_Min  		 = 1;
+	private int 		end_Hour 		 = 1;
+	private int 		end_Min 		 = 1;
+	Calendar cal2 = Calendar.getInstance();
+	
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
+		
+		
 		//	North Panel
-		journalLabel.setText(Msg.translate(Env.getCtx(), "Journal"));
 		northPanel.setLayout(new GridBagLayout());	
+		journalLabel.setText(Msg.translate(Env.getCtx(), "Journal"));
 		s_SlotLabel.setText("Inicio Hora Descanso");
 		e_SlotLabel.setText("Fin Hora Descanso");
 		s_SlotButton.setEditable(false);
 		e_SlotButton.setEditable(false);
+		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
+		northPanel.add(journalLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
+				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0)); 
 		northPanel.add(journalSearch, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
 		northPanel.add(bSave, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(s_SlotLabel, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
+		northPanel.add(s_SlotLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(s_SlotButton, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
+		northPanel.add(s_SlotButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(e_SlotLabel, new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0
+		northPanel.add(e_SlotLabel, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(e_SlotButton, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0
+		northPanel.add(e_SlotButton, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		
 		
 		//	Hour Edit Hours Dialog
 		hour_Dialog = new JDialog(m_frame, true);
@@ -243,6 +261,7 @@ public class VJournalDay extends JournalDay
 		GridLayout experimentLayout = new GridLayout(0,24,0,0);
 		
 		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
+		
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
 		journalSearch.addVetoableChangeListener(this);
 		hoursPanel.setBackground(Color.BLUE);
@@ -253,7 +272,10 @@ public class VJournalDay extends JournalDay
 		rightPanel.setLayout(new BoxLayout(rightPanel,BoxLayout.Y_AXIS));
 		groupLabel.setFont(new Font("SanSerif", Font.PLAIN, 14));
 		groupLabel.setText("Grupos de Incidencias:");
-		leftPanel.add(groupLabel);
+
+		groupLabel.setMinimumSize(new Dimension(170, 15));
+	
+	 	
 		
 	
 		
@@ -272,10 +294,8 @@ public class VJournalDay extends JournalDay
 			hoursLabel.setMaximumSize(new Dimension(s_Hour, 15));
 			hoursPanel.add(hoursLabel);
 		}
+		leftPanel.add(groupLabel);
 		rightPanel.add(hoursPanel);
-		//	Add element (incidence)
-		addItems();
-	
 	}
 	
 	/**
@@ -283,9 +303,20 @@ public class VJournalDay extends JournalDay
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 10/09/2014, 09:21:46
 	 * @return void
 	 */
-	public void addItems() {
+	public void addItems(int p_HR_Journal_ID) {
 		int i=0;
-		ArrayList<KeyNamePair> data = getGroupIncidenceData(trxName);
+		
+		rightPanel.removeAll();
+		leftPanel.removeAll();
+		  aux=0;
+		  t_Button=0;
+		rightPanel.setMinimumSize(new Dimension(170,800));
+		leftPanel.add(groupLabel);
+		rightPanel.add(hoursPanel);
+		//	Add element (incidence)
+		ArrayList<KeyNamePair> data = getGroupIncidenceData(p_HR_Journal_ID,trxName);
+		setStartHour(p_HR_Journal_ID,trxName);
+		setEndHour(p_HR_Journal_ID,trxName);
 		conceptBox = new JCheckBox[data.size()];
 		h_IncidenceButton = new JButton[30];
 		a_IncidenceButton = new JButton[data.size()];
@@ -293,67 +324,78 @@ public class VJournalDay extends JournalDay
 		HR_Incidence=new int[data.size()];
 	    
 		hPanel = new JPanel[data.size()];
-		for(int w = 0; w <30; w++){
-			  h_IncidenceButton[w]  = new JButton();
+		for (int j = 0; j < 30; j++){
+			  h_IncidenceButton[j]  = new JButton();
 		}
 		for(KeyNamePair pp : data) {
-				conceptBox[i]  = new JCheckBox(pp.toString(), true);
-			    sliderPanel[i] = new JPanel();
-
-				HR_Incidence[i]=Integer.parseInt(pp.getID());
-			    
-			    a_IncidenceButton[i]  = new JButton();
-			    hPanel[i] = new JPanel();
-			    
-			    conceptBox[i].setFont(new Font("SanSerif", Font.PLAIN, 14));
-				conceptBox[i].addActionListener(this);
-			    conceptBox[i].setName("--"+i);
-			    conceptBox[i].setMinimumSize(new Dimension(130, 15));
-			    
-			    a_IncidenceButton[i].setMinimumSize(new Dimension(10,10));
-			    a_IncidenceButton[i].setMaximumSize(new Dimension(11,11));
-			    a_IncidenceButton[i].setText("("+i+")"+"+");
-			    a_IncidenceButton[i].setName("--"+i);
-			  
-			    a_IncidenceButton[i].addActionListener(this);
-			    sliderPanel[i].setLayout(null);
-				  sliderPanel[i].setMaximumSize(new Dimension(s_Hour*25, 15));
-			    //	Add Hours Button Line
-				  rightPanel.add(sliderPanel[i]);
-			    addPanelHour(i,i);
-			    //	Add Label Cocept rightPanel
-			    hPanel[i].setLayout(new BorderLayout()); 
-			    hPanel[i].setMaximumSize(new Dimension(250, 15));
-			    hPanel[i].add(conceptBox[i], BorderLayout.CENTER);
-			    hPanel[i].add(a_IncidenceButton[i], BorderLayout.LINE_END);
-
-			    leftPanel.add(hPanel[i]);
-			    //	Add Slider Hours rightPanel
-			   		   
-			    i++;
+			sliderPanel[i] = new JPanel();	
+			conceptBox[i]  = new JCheckBox(pp.toString(), true);
+			HR_Incidence[i]=Integer.parseInt(pp.getID());
+		    
+		    a_IncidenceButton[i]  = new JButton();
+		    hPanel[i] = new JPanel();
+		    
+		    conceptBox[i].setFont(new Font("SanSerif", Font.PLAIN, 14));
+			conceptBox[i].addActionListener(this);
+		    conceptBox[i].setName("--"+i);
+		    conceptBox[i].setMinimumSize(new Dimension(130, 15));
+		    
+		    a_IncidenceButton[i].setMinimumSize(new Dimension(10,10));
+		    a_IncidenceButton[i].setMaximumSize(new Dimension(11,11));
+		    a_IncidenceButton[i].setText("+");
+		    a_IncidenceButton[i].setName("--"+i);
+		  
+		    a_IncidenceButton[i].addActionListener(this);
+			   
+			   
+		    sliderPanel[i].setLayout(null);
+  		    sliderPanel[i].setMaximumSize(new Dimension(s_Hour*25, 15));
+				  
+		    //	Add Hours Button Line
+	    	rightPanel.add(sliderPanel[i]);
+			addButtonHour(i,i);
+			//	Add Label Cocept rightPanel
+			hPanel[i].setLayout(new BorderLayout()); 
+			hPanel[i].setMaximumSize(new Dimension(250, 15));
+			hPanel[i].add(conceptBox[i], BorderLayout.CENTER);
+			hPanel[i].add(a_IncidenceButton[i], BorderLayout.LINE_END);
+		    leftPanel.add(hPanel[i]);
+		    //	Add Slider Hours rightPanel
+		    i++;
 		}
+
+		 leftPanel.repaint();
+		 rightPanel.repaint();
 	}
 
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>29/09/2014, 09:21:46
- *
+ *	Add Button Hour
  */
-public void addPanelHour(int i, int j) {
+public void addButtonHour(int i, int j) {
+	//	Set HR_Incidence_ID for Get RGBColor
     setRGB(HR_Incidence[i],trxName);
+    //calculate(m_StartHour, m_EndHour);
+    start_Hour = ((int) m_StartHour.getTime() /3600000)-4 ;
+	end_Hour   =((int) m_EndHour.getTime() /3600000)-4;
+	float fstart_Hour   =(float) ((((int) m_EndHour.getTime() /3600000)-4)*1.6);
+	float fend_Hour   =(float) ((((int) m_EndHour.getTime() /3600000)-4));
+	
 	  h_IncidenceButton[j].setName(String.valueOf(j));
-	  h_IncidenceButton[j].setBackground(new Color(m_R, m_G, m_B));
-	  h_IncidenceButton[j].setForeground(new Color(m_R, m_G, m_B));
-	  Border thickBorder = new LineBorder(new Color(m_R, m_G, m_B), 0);
+	  h_IncidenceButton[j].setIconTextGap(i);
+	  h_IncidenceButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+	  h_IncidenceButton[j].setForeground(new Color(m_RColor, m_GColor, m_BColor));
+	  Border thickBorder = new LineBorder(new Color(m_RColor, m_GColor, m_BColor), 0);
 	  h_IncidenceButton[j].setBorder(thickBorder);
-	  h_IncidenceButton[j].setSize(new Dimension(30,11));
-	  h_IncidenceButton[j].setLocation(j*40, 0);
+	  h_IncidenceButton[j].setSize(new Dimension(((end_Hour+ (int) fstart_Hour)-(start_Hour+(int) fend_Hour))*120,11));
+	  h_IncidenceButton[j].setLocation(start_Hour*120, 0);
 	  h_IncidenceButton[j].addActionListener(this);
 	  h_IncidenceButton[j].addMouseListener(this);
 	  h_IncidenceButton[j].setText(String.valueOf(j));
 	  sliderPanel[i].add(h_IncidenceButton[j]);
 	  sliderPanel[i].repaint();
-	  total++;  
-	}
+	  t_Button++;
+	} //	addPanelHour
 
 	  @Override
 	  public void mousePressed(MouseEvent e) {
@@ -374,33 +416,58 @@ public void addPanelHour(int i, int j) {
 	
 	public void actionPerformed(ActionEvent e){
 		int count=conceptBox.length;
-		int j=0;
+		int j=0; 
 		if(e.getActionCommand().equals(c_HourButton.getText())){
 			hour_Dialog.setVisible(false);
 		}
+		
 		if(e.getActionCommand().equals(s_HourButton.getText())){
-			start_Hour = (Integer) s_HourList.getSelectedItem() * s_Hour;
-			end_Hour   = (Integer) e_HourList.getSelectedIndex() * s_Hour;
-			start_Min  = (Integer) s_MinList.getSelectedIndex() * s_Hour / N_MIN;
-			end_Min    = (Integer) e_MinList.getSelectedItem() * s_Hour / N_MIN;
-			s_IncideceButton = (end_Hour+end_Min)-(start_Hour+start_Min);
+			//calculate((Integer) s_HourList.getSelectedItem(),(Integer) e_HourList.getSelectedItem());
 			if(start_Hour<end_Hour){
-			h_IncidenceButton[aux].setSize(new Dimension(s_IncideceButton,11));
-		    h_IncidenceButton[aux].setLocation(start_Hour+start_Min, 0);
-		    hour_Dialog.setVisible(false);
+				hour_Dialog.setVisible(false);
+				
+				start_Hour = (Integer) s_HourList.getSelectedItem() * s_Hour;
+				end_Hour   = (Integer) e_HourList.getSelectedIndex() * s_Hour;
+				start_Min  = (Integer) s_MinList.getSelectedIndex() * s_Hour / N_MIN;
+				end_Min    = (Integer) e_MinList.getSelectedItem() * s_Hour / N_MIN;
+				s_IncideceButton = (end_Hour+end_Min)-(start_Hour+start_Min);
+				h_IncidenceButton[aux].setLocation(start_Hour+start_Min, 0);
+			    
+				Timer timer = new Timer(10, new ActionListener() {
+						 int  n=0;
+					   public void actionPerformed(ActionEvent e) {
+					    if(n<=s_IncideceButton){
+					    	h_IncidenceButton[aux].setSize(new Dimension(n,11));
+					     n=n+10;
+					     	
+					    }
+					   }
+					  });
+					  
+					  timer.start();
 			}
 			else{
-				JOptionPane.showMessageDialog(null, "La hora de inicio debe ser menor que la hora final");
+				JOptionPane.showMessageDialog(null, "Invalid Hour");
 			}
 	    }
 		for(int i = 0;  i< count; i++ ){
-			if(conceptBox[i].isSelected())
-				h_IncidenceButton[i].setVisible(true);
-			else 
-				h_IncidenceButton[i].setVisible(false);
-			if(e.getActionCommand().equals(a_IncidenceButton[i].getText())){
-				addPanelHour(i,total);
-				aux=total-1;
+			if(conceptBox[i].isSelected()){
+				for(int x = 0; x<t_Button; x++){
+					a_IncidenceButton[i].setVisible(true);
+				if(h_IncidenceButton[x].getIconTextGap()==i)
+					h_IncidenceButton[x].setVisible(true);		
+				}
+			}
+			else { 
+				for(int x = 0; x<t_Button; x++){
+					a_IncidenceButton[i].setVisible(false);
+				if(h_IncidenceButton[x].getIconTextGap()==i)
+					h_IncidenceButton[x].setVisible(false);
+				}
+			}
+			if(e.getSource().equals(a_IncidenceButton[i])){
+				addButtonHour(i,t_Button);
+				aux=t_Button-1;
 				hour_Dialog.setVisible(true);	
 			}
 		}
@@ -410,7 +477,7 @@ public void addPanelHour(int i, int j) {
 				aux=j-1;
 				hour_Dialog.setVisible(true);	
 				break;
-			}	if(j==total)break;
+			}	if(j==t_Button)break;
 		} 
 	} 	//  actionPerformed
 	@Override
@@ -431,7 +498,7 @@ public void addPanelHour(int i, int j) {
 		int i = 0;
 		while( true ){
 			 i++;
-			if(e.getComponent().getName().equals(h_IncidenceButton[i-1].getText())){
+				if(e.getComponent().getName().equals(h_IncidenceButton[i-1].getName())){
 			Border thickBorder = new LineBorder(Color.WHITE, 3);
 			h_IncidenceButton[i-1].setBorder(thickBorder);
 			break;
@@ -443,32 +510,32 @@ public void addPanelHour(int i, int j) {
 		int i = 0;
 		while(true){
 			i++;
-			if(e.getComponent().getName().equals(h_IncidenceButton[i-1].getText())){
-			Border thickBorder = new LineBorder(new Color(m_R, m_G, m_B), 0);
+			if(e.getComponent().getName().equals(h_IncidenceButton[i-1].getName())){
+			Border thickBorder = new LineBorder(new Color(m_RColor, m_GColor, m_BColor), 0);
 			h_IncidenceButton[i-1].setBorder(thickBorder);
 			break;
 			} 
-		}
-		
+		}		
 	}	
 
 	@Override
-	public void vetoableChange(PropertyChangeEvent evt)
-			throws PropertyVetoException {
-
-	
+	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 		if(evt.getSource().equals(journalSearch)){
 			m_HR_Journal_ID=(Integer) journalSearch.getValue();
 			setTime(m_HR_Journal_ID,trxName);
+			addItems(m_HR_Journal_ID);
 			m_startTime.toString();
 			
 			s_SlotButton.setText(String.valueOf(new Time (m_startTime.getTime())));
 			e_SlotButton.setText(String.valueOf(new Time (m_endTime.getTime())));
 		}
 	}
-	
-	
+	 public void calculate(Timestamp p_SHour, Timestamp p_EHour){
+
+		 start_Hour = 4 - (int) p_SHour.getTime() /3600000 ;
+			end_Hour   =(int) p_EHour.getTime() /3600000;
+			s_IncideceButton = (end_Hour+end_Min)-(start_Hour+start_Min);
+	 }
 
 }
-
 

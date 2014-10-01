@@ -26,7 +26,6 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.spin.model.MHRIncidenceGroup;
 import org.spin.model.MHRJournal;
 
 /**
@@ -43,26 +42,57 @@ public class JournalDay
 	protected int 			m_HR_Journal_ID 		= 0;
 	protected int			m_HR_IncidenceGroup_ID  = 0;
 	/** Red Color			*/
-	protected int 			m_R 					= 0;
+	protected int 			m_RColor				= 0;
 	/** Green Color			*/
-	protected int 			m_G 					= 0;
+	protected int 			m_GColor				= 0;
 	/** Blue Color			*/
-	protected int 			m_B 					= 0;
+	protected int 			m_BColor				= 0;
 	/** Start Time			*/
 	protected Timestamp 	m_startTime 			= null;
 	/** End Time			*/
 	protected Timestamp 	m_endTime 				= null;
+	protected Timestamp		m_StartHour				= null;
+	protected Timestamp		m_EndHour				= null;
 	/**	Logger			*/
 	public static CLogger log = CLogger.getCLogger(JournalDay.class);
 	/**	Export Class for Bank Account	*/
 	public String			m_PaymentExportClassHR = null;
 	
-	protected ArrayList<KeyNamePair> getGroupIncidenceData(String trxName){
-		String sql = "SELECT igc.HR_IncidenceGroup_ID, c.Name FROM " +
-				"HR_IGConcept as igc " +
-				"INNER Join HR_IncidenceGroup as ig on(ig.HR_IncidenceGroup_ID = igc.HR_IncidenceGroup_ID) " +
-				"INNER JOIN HR_Concept as c  on(c.HR_Concept_ID = igc.HR_Concept_ID)";
+	protected ArrayList<KeyNamePair> getGroupIncidenceData(int p_HR_Journal_ID, String trxName){
+		String sql = "SELECT c.HR_Concept_ID, c.name FROM " +
+				"HR_JournalLine as jl " +
+				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
+				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
+				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID;
 		return getData(sql, trxName);
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 01/10/2014, 14:37:48
+	 * @param p_HR_Journal_ID
+	 * @param trxName
+	 * @return
+	 * @return Timestamp
+	 */
+	protected Timestamp getStarHour(int p_HR_Journal_ID, String trxName){
+		return DB.getSQLValueTS(trxName, "SELECT jl.StartTime FROM " +
+		"HR_JournalLine as jl " +
+		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
+		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
+		"WHERE jl.HR_Journal_ID=?", p_HR_Journal_ID);
+	}
+	protected void setStartHour(int p_HR_Journal_ID, String trxName){
+		m_StartHour = getStarHour(p_HR_Journal_ID, trxName);
+	}
+	protected Timestamp getEndHour(int p_HR_Journal_ID, String trxName){
+		return DB.getSQLValueTS(trxName, "SELECT jl.EndTime FROM " +
+		"HR_JournalLine as jl " +
+		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
+		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
+		"WHERE jl.HR_Journal_ID=?", p_HR_Journal_ID);
+	}
+	protected void setEndHour(int p_HR_Journal_ID, String trxName){
+		m_EndHour = getEndHour(p_HR_Journal_ID, trxName);
 	}
 	/**
 	 * 
@@ -80,11 +110,9 @@ public class JournalDay
 		} 
 	}
 	protected void setRGB(int p_HR_IncidenceGroup, String trxName){
-	
-			m_R = getRColor(p_HR_IncidenceGroup,trxName);
-			m_G = getGColor(p_HR_IncidenceGroup,trxName);
-			m_B = getBColor(p_HR_IncidenceGroup,trxName);
-		 	
+			m_RColor = getRColor(p_HR_IncidenceGroup,trxName);
+			m_GColor = getGColor(p_HR_IncidenceGroup,trxName);
+			m_BColor = getBColor(p_HR_IncidenceGroup,trxName);	
 	}
 	/**
 	 * 
@@ -109,9 +137,10 @@ public class JournalDay
 	 * @return int
 	 */
 	protected int getRColor(int p_HR_IncidenceGroup, String trxName){
-		return DB.getSQLValue(trxName, "SELECT red FROM " +
-				"HR_IncidenceGroup " +
-				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
+		return DB.getSQLValue(trxName, "SELECT ig.red, igc.HR_Concept_ID " +
+				"FROM HR_IGConcept as igc " +
+				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
+				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
 	}
 	/**
 	 * 
@@ -122,9 +151,10 @@ public class JournalDay
 	 * @return int
 	 */
 	protected int getGColor(int p_HR_IncidenceGroup, String trxName){
-		return DB.getSQLValue(trxName, "SELECT green FROM " +
-				"HR_IncidenceGroup " +
-				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
+		return DB.getSQLValue(trxName, "SELECT ig.green, igc.HR_Concept_ID " +
+				"FROM HR_IGConcept as igc " +
+				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
+				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
 	}
 	/**
 	 * 
@@ -135,9 +165,10 @@ public class JournalDay
 	 * @return int
 	 */
 	protected int getBColor(int p_HR_IncidenceGroup, String trxName){
-		return DB.getSQLValue(trxName, "SELECT blue FROM " +
-				"HR_IncidenceGroup " +
-				"Where HR_IncidenceGroup_ID = ?", p_HR_IncidenceGroup);
+		return DB.getSQLValue(trxName, "SELECT ig.blue, igc.HR_Concept_ID " +
+				"FROM HR_IGConcept as igc " +
+				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
+				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
 	}
 	/**
 	 * 
