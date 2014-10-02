@@ -22,11 +22,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
+
+import org.compiere.model.MOrgInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.spin.model.MHRJournal;
+import org.spin.model.MHRJournalLine;
 
 /**
  * 
@@ -48,16 +52,55 @@ public class JournalDay
 	/** Blue Color			*/
 	protected int 			m_BColor				= 0;
 	/** Start Time			*/
-	protected Timestamp 	m_startTime 			= null;
+	protected Timestamp 	m_TimeSlotStart 			= null;
 	/** End Time			*/
-	protected Timestamp 	m_endTime 				= null;
-	protected Timestamp		m_StartHour				= null;
-	protected Timestamp		m_EndHour				= null;
+	protected Timestamp 	m_TimeSlotEnd 				= null;
+//	protected Timestamp		m_StartHour				= null;
+//	protected Timestamp		m_EndHour				= null;
+	/**	Client				*/
+	protected int 				m_AD_Client_ID = 0;
+	/**	Organization		*/
+	protected int 				m_AD_Org_ID = 0;
+	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
+
+	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
+	protected ArrayList<Timestamp> 			m_EndHour			= new ArrayList<Timestamp>();
 	/**	Logger			*/
 	public static CLogger log = CLogger.getCLogger(JournalDay.class);
 	/**	Export Class for Bank Account	*/
 	public String			m_PaymentExportClassHR = null;
 	
+	protected ArrayList<KeyNamePair> getJournalLineData(int p_HR_Journal_ID, String trxName){
+		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
+		StringBuffer sql =new StringBuffer("SELECT jl.AD_Org_ID, jl.HR_JournalLine_ID, jl.description FROM " +
+				"HR_JournalLine as jl " +
+				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
+				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
+				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID);
+		if (m_AD_Org_ID != 0)
+			sql.append("AND jl.AD_Org_ID=? ");
+		try
+		{
+			
+			PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null);
+			
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				m_AD_Org_ID=rs.getInt("AD_Org_ID");
+				data.add(new KeyNamePair(rs.getInt("HR_JournalLine_ID"), rs.getString("description")));
+			}
+			rs.close();
+			pstmt.close();
+		}	
+		
+		catch (SQLException e)
+		{
+			log.log(Level.SEVERE, sql.toString(), e);
+		}
+			
+		return data;
+	}
 	protected ArrayList<KeyNamePair> getGroupIncidenceData(int p_HR_Journal_ID, String trxName){
 		String sql = "SELECT c.HR_Concept_ID, c.name FROM " +
 				"HR_JournalLine as jl " +
@@ -74,25 +117,25 @@ public class JournalDay
 	 * @return
 	 * @return Timestamp
 	 */
-	protected Timestamp getStarHour(int p_HR_Journal_ID, String trxName){
+	protected Timestamp getStarHour(int p_HR_JournalLine_ID, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT jl.StartTime FROM " +
 		"HR_JournalLine as jl " +
 		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
 		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-		"WHERE jl.HR_Journal_ID=?", p_HR_Journal_ID);
+		"WHERE jl.HR_JournalLine_ID=?", p_HR_JournalLine_ID);
 	}
-	protected void setStartHour(int p_HR_Journal_ID, String trxName){
-		m_StartHour = getStarHour(p_HR_Journal_ID, trxName);
+	protected void setStartHour(int p_HR_JournalLine_ID, String trxName){
+		m_StartHour.add(getStarHour(p_HR_JournalLine_ID, trxName));
 	}
-	protected Timestamp getEndHour(int p_HR_Journal_ID, String trxName){
+	protected Timestamp getEndHour(int p_HR_JournalLine_ID, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT jl.EndTime FROM " +
 		"HR_JournalLine as jl " +
 		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
 		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-		"WHERE jl.HR_Journal_ID=?", p_HR_Journal_ID);
+		"WHERE jl.HR_journalLine_ID=?", p_HR_JournalLine_ID);
 	}
-	protected void setEndHour(int p_HR_Journal_ID, String trxName){
-		m_EndHour = getEndHour(p_HR_Journal_ID, trxName);
+	protected void setEndHour(int p_HR_JournalLine_ID, String trxName){
+		m_EndHour.add(getEndHour(p_HR_JournalLine_ID, trxName));
 	}
 	/**
 	 * 
@@ -100,19 +143,19 @@ public class JournalDay
 	 * @param trxName
 	 * @return void
 	 */
-	protected void setTime(int p_HR_Journal, String trxName){
+	protected void setTimeSlot(int p_HR_Journal, String trxName){
 		MHRJournal journal = new MHRJournal(Env.getCtx(), 0, trxName);
 		if(m_HR_Journal_ID != 0)
 			journal.setHR_Journal_ID(m_HR_Journal_ID);
 		if(m_HR_Journal_ID != 0){
-			m_startTime = getStartTime(p_HR_Journal,trxName);
-			m_endTime = getEndTime(p_HR_Journal,trxName);
+			m_TimeSlotStart = getTimeSlotStart(p_HR_Journal,trxName);
+			m_TimeSlotEnd = getTimeSlotEnd(p_HR_Journal,trxName);
 		} 
 	}
-	protected void setRGB(int p_HR_IncidenceGroup, String trxName){
-			m_RColor = getRColor(p_HR_IncidenceGroup,trxName);
-			m_GColor = getGColor(p_HR_IncidenceGroup,trxName);
-			m_BColor = getBColor(p_HR_IncidenceGroup,trxName);	
+	protected void setRGB(int p_HR_Concept_ID, String trxName){
+			m_RColor = getRColor(p_HR_Concept_ID,trxName);
+			m_GColor = getGColor(p_HR_Concept_ID,trxName);
+			m_BColor = getBColor(p_HR_Concept_ID,trxName);	
 	}
 	/**
 	 * 
@@ -122,7 +165,7 @@ public class JournalDay
 	 * @return
 	 * @return Timestamp
 	 */
-	protected Timestamp getEndTime(int p_HR_Journal, String trxName){
+	protected Timestamp getTimeSlotEnd(int p_HR_Journal, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT TimeSlotEnd FROM " +
 				"HR_Journal " +
 				"Where HR_Journal_ID = ?", p_HR_Journal);
@@ -131,44 +174,44 @@ public class JournalDay
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_IncidenceGroup
+	 * @param p_HR_Concept_ID
 	 * @param trxName
 	 * @return
 	 * @return int
 	 */
-	protected int getRColor(int p_HR_IncidenceGroup, String trxName){
+	protected int getRColor(int p_HR_Concept_ID, String trxName){
 		return DB.getSQLValue(trxName, "SELECT ig.red, igc.HR_Concept_ID " +
 				"FROM HR_IGConcept as igc " +
 				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
+				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
 	}
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_IncidenceGroup
+	 * @param p_HR_Concept_ID
 	 * @param trxName
 	 * @return
 	 * @return int
 	 */
-	protected int getGColor(int p_HR_IncidenceGroup, String trxName){
+	protected int getGColor(int p_HR_Concept_ID, String trxName){
 		return DB.getSQLValue(trxName, "SELECT ig.green, igc.HR_Concept_ID " +
 				"FROM HR_IGConcept as igc " +
 				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
+				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
 	}
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_IncidenceGroup
+	 * @param p_HR_Concept_ID
 	 * @param trxName
 	 * @return
 	 * @return int
 	 */
-	protected int getBColor(int p_HR_IncidenceGroup, String trxName){
+	protected int getBColor(int p_HR_Concept_ID, String trxName){
 		return DB.getSQLValue(trxName, "SELECT ig.blue, igc.HR_Concept_ID " +
 				"FROM HR_IGConcept as igc " +
 				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_IncidenceGroup);
+				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
 	}
 	/**
 	 * 
@@ -178,7 +221,7 @@ public class JournalDay
 	 * @return
 	 * @return Timestamp
 	 */
-	protected Timestamp getStartTime(int p_HR_Journal, String trxName){
+	protected Timestamp getTimeSlotStart(int p_HR_Journal, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT TimeSlotStart FROM " +
 				"HR_Journal " +
 				"Where HR_Journal_ID = ?", p_HR_Journal);
@@ -211,6 +254,28 @@ public class JournalDay
 			log.log(Level.SEVERE, sql, e);
 		}
 		return data;
+	}
+	
+	protected String generateJournalDay(String trxName){
+		 String k="";
+		 //	Org Info
+		// MOrgInfo orgInfo = null;
+		// orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
+			JOptionPane.showMessageDialog(null, m_AD_Org_ID+" clientr ");
+			
+		// MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
+		// journalLine.setAD_Org_ID(m_AD_Org_ID);
+		
+		 //	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
+			for(int i = 0; i<m_HR_Concept_ID.size(); i++)
+				JOptionPane.showMessageDialog(null, m_HR_Concept_ID.get(i));
+			//	journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+			for(int i = 0; i<m_StartHour.size(); i++){
+				JOptionPane.showMessageDialog(null, m_StartHour.get(i)+" hasta "+m_EndHour.get(i));
+			//	journalLine.setStartTime(m_StartHour.get(i));
+			//	journalLine.setEndTime(m_EndHour.get(i));
+			}
+		 return k;
 	}
 	
 }
