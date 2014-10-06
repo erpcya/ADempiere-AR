@@ -162,6 +162,8 @@ public class VJournalDay extends JournalDay
 	private int 		start_Min  		 = 1;
 	private int 		end_Hour 		 = 1;
 	private int 		end_Min 		 = 1;
+	private float 		fstart_Hour		 = 0;
+	private float 		fend_Hour		 = 0;
 	Calendar cal2 = Calendar.getInstance();
 	
 	private void jbInit() {
@@ -307,14 +309,18 @@ public class VJournalDay extends JournalDay
 		int cont=0;
 		rightPanel.removeAll();
 		leftPanel.removeAll();
-		  aux=0;
-		  t_Button=0;
+
+		m_StartHour.clear();
+		m_EndHour.clear();
+		aux=0;
+		t_Button=0;
+		h_IncidenceButton=null;
 		rightPanel.setMinimumSize(new Dimension(170,800));
 		leftPanel.add(groupLabel);
 		rightPanel.add(hoursPanel);
 		//	Add element (incidence)
 		ArrayList<KeyNamePair> dataIG = getGroupIncidenceData(p_HR_Journal_ID,trxName);
-		ArrayList<KeyNamePair> dataJL = getJournalLineData(p_HR_Journal_ID,trxName);
+		
 
 		conceptBox = new JCheckBox[dataIG.size()];
 		h_IncidenceButton = new JButton[30];
@@ -330,7 +336,7 @@ public class VJournalDay extends JournalDay
 			sliderPanel[i] = new JPanel();	
 			conceptBox[i]  = new JCheckBox(pp.toString(), true);
 			m_HR_Concept_ID.add(i,Integer.parseInt(pp.getID()));
-		    
+			ArrayList<KeyNamePair> dataJL = getJournalLineData(p_HR_Journal_ID,m_HR_Concept_ID.get(i),trxName);
 		    a_IncidenceButton[i]  = new JButton();
 		    hPanel[i] = new JPanel();
 		    
@@ -358,29 +364,30 @@ public class VJournalDay extends JournalDay
 			hPanel[i].add(a_IncidenceButton[i], BorderLayout.LINE_END);
 		    leftPanel.add(hPanel[i]);
 		    //	Add Slider Hours rightPanel
-		    i++; 
+		    
+		    for(KeyNamePair rr : dataJL) {
+	    		setSE_Hour(Integer.parseInt(rr.getID()),trxName);
+	    		start_Hour = (((int) m_StartHour.get(cont).getTime() /3600000)-4)*120 ;
+	    		end_Hour   =(((int) m_EndHour.get(cont).getTime() /3600000)-4)*120;
+	    		fstart_Hour   = (((((float) m_StartHour.get(cont).getTime() /3600000)-4)*120)-start_Hour);
+	    		fend_Hour   =   (((((float) m_EndHour.get(cont).getTime()   /3600000)-4)*120)-end_Hour);
+	    		addButtonHour(i,cont);
+	    		cont++;
+	    	}
+		    i++;
 		}
-		for(KeyNamePair pp : dataJL) {
-    		setStartHour(Integer.parseInt(pp.getID()),trxName);
-    		setEndHour(Integer.parseInt(pp.getID()),trxName);
-    		addButtonHour(cont,cont);
-    		cont++;
-    	}
+		
 		 leftPanel.repaint();
 		 rightPanel.repaint();
 	}
-
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>29/09/2014, 09:21:46
  *	Add Button Hour
  */
 public void addButtonHour(int i, int j) {
 	//	Set HR_Concept_ID for Get RGBColor
-    setRGB(m_HR_Concept_ID.get(i),trxName);
-    start_Hour = (((int) m_StartHour.get(i).getTime() /3600000)-4)*120 ;
-	end_Hour   =(((int) m_EndHour.get(i).getTime() /3600000)-4)*120;
-	float fstart_Hour   = (((((float) m_StartHour.get(i).getTime() /3600000)-4)*120)-start_Hour);
-	float fend_Hour   =   (((((float) m_EndHour.get(i).getTime()   /3600000)-4)*120)-end_Hour);
+	setRGB(m_HR_Concept_ID.get(i),trxName);
+    
 	  h_IncidenceButton[j].setName(String.valueOf(j));
 	  h_IncidenceButton[j].setIconTextGap(i);
 	  h_IncidenceButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
@@ -428,8 +435,8 @@ public void addButtonHour(int i, int j) {
 			//calculate((Integer) s_HourList.getSelectedItem(),(Integer) e_HourList.getSelectedItem());
 			if(start_Hour<end_Hour){
 				hour_Dialog.setVisible(false);
-				m_StartHour.add(aux, new Timestamp(((4 + (Integer) s_HourList.getSelectedItem()) * 3600000) + (Integer) s_MinList.getSelectedItem()*3600000/N_MIN));
-				m_EndHour.add(aux, new Timestamp  (((4 + (Integer) e_HourList.getSelectedItem()) * 3600000) + (Integer) e_MinList.getSelectedItem()*3600000/N_MIN));
+				m_StartHour.add(new Timestamp(((4 + (Integer) s_HourList.getSelectedItem()) * 3600000) + (Integer) s_MinList.getSelectedItem()*3600000/N_MIN));
+				m_EndHour.add(new Timestamp  (((4 + (Integer) e_HourList.getSelectedItem()) * 3600000) + (Integer) e_MinList.getSelectedItem()*3600000/N_MIN));
 								
 				start_Hour = (Integer) s_HourList.getSelectedItem() * s_Hour;
 				end_Hour   = (Integer) e_HourList.getSelectedItem() * s_Hour;
@@ -476,7 +483,7 @@ public void addButtonHour(int i, int j) {
 		}
 		while(true){
 			j++;
-			if(e.getActionCommand().equals(h_IncidenceButton[j-1].getText())){
+			if(t_Button!=0 && e.getActionCommand().equals(h_IncidenceButton[j-1].getText())){
 				aux=j-1;
 				hour_Dialog.setVisible(true);	
 				break;

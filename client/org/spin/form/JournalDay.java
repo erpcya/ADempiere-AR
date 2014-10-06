@@ -29,6 +29,7 @@ import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
+import org.compiere.util.Msg;
 import org.spin.model.MHRJournal;
 import org.spin.model.MHRJournalLine;
 
@@ -70,17 +71,14 @@ public class JournalDay
 	/**	Export Class for Bank Account	*/
 	public String			m_PaymentExportClassHR = null;
 	
-	protected ArrayList<KeyNamePair> getJournalLineData(int p_HR_Journal_ID, String trxName){
+	protected ArrayList<KeyNamePair> getJournalLineData(int p_HR_Journal_ID, int p_HR_Concept_ID, String trxName){
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
 		StringBuffer sql =new StringBuffer("SELECT jl.AD_Org_ID, jl.HR_JournalLine_ID, jl.description FROM " +
 				"HR_JournalLine as jl " +
 				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
 				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID);
-		if (m_AD_Org_ID != 0)
-			sql.append("AND jl.AD_Org_ID=? ");
-		try
-		{
+				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" and jl.HR_Concept_ID="+p_HR_Concept_ID);
+		try	{
 			
 			PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null);
 			
@@ -88,14 +86,13 @@ public class JournalDay
 			while (rs.next())
 			{
 				m_AD_Org_ID=rs.getInt("AD_Org_ID");
+				
 				data.add(new KeyNamePair(rs.getInt("HR_JournalLine_ID"), rs.getString("description")));
 			}
 			rs.close();
 			pstmt.close();
 		}	
-		
-		catch (SQLException e)
-		{
+		catch (SQLException e){
 			log.log(Level.SEVERE, sql.toString(), e);
 		}
 			
@@ -106,7 +103,7 @@ public class JournalDay
 				"HR_JournalLine as jl " +
 				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
 				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID;
+				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" GROUP BY c.HR_Concept_ID";
 		return getData(sql, trxName);
 	}
 	/**
@@ -124,8 +121,9 @@ public class JournalDay
 		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
 		"WHERE jl.HR_JournalLine_ID=?", p_HR_JournalLine_ID);
 	}
-	protected void setStartHour(int p_HR_JournalLine_ID, String trxName){
+	protected void setSE_Hour(int p_HR_JournalLine_ID, String trxName){
 		m_StartHour.add(getStarHour(p_HR_JournalLine_ID, trxName));
+		m_EndHour.add(getEndHour(p_HR_JournalLine_ID, trxName));
 	}
 	protected Timestamp getEndHour(int p_HR_JournalLine_ID, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT jl.EndTime FROM " +
@@ -133,9 +131,6 @@ public class JournalDay
 		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
 		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
 		"WHERE jl.HR_journalLine_ID=?", p_HR_JournalLine_ID);
-	}
-	protected void setEndHour(int p_HR_JournalLine_ID, String trxName){
-		m_EndHour.add(getEndHour(p_HR_JournalLine_ID, trxName));
 	}
 	/**
 	 * 
@@ -151,12 +146,7 @@ public class JournalDay
 			m_TimeSlotStart = getTimeSlotStart(p_HR_Journal,trxName);
 			m_TimeSlotEnd = getTimeSlotEnd(p_HR_Journal,trxName);
 		} 
-	}
-	protected void setRGB(int p_HR_Concept_ID, String trxName){
-			m_RColor = getRColor(p_HR_Concept_ID,trxName);
-			m_GColor = getGColor(p_HR_Concept_ID,trxName);
-			m_BColor = getBColor(p_HR_Concept_ID,trxName);	
-	}
+	}	
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:02
@@ -168,8 +158,25 @@ public class JournalDay
 	protected Timestamp getTimeSlotEnd(int p_HR_Journal, String trxName){
 		return DB.getSQLValueTS(trxName, "SELECT TimeSlotEnd FROM " +
 				"HR_Journal " +
+				"Where HR_Journal_ID = ?", p_HR_Journal);	
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:12
+	 * @param p_HR_Journal
+	 * @param trxName
+	 * @return
+	 * @return Timestamp
+	 */
+	protected Timestamp getTimeSlotStart(int p_HR_Journal, String trxName){
+		return DB.getSQLValueTS(trxName, "SELECT TimeSlotStart FROM " +
+				"HR_Journal " +
 				"Where HR_Journal_ID = ?", p_HR_Journal);
-		
+	}
+	protected void setRGB(int p_HR_Concept_ID, String trxName){
+		m_RColor = getRColor(p_HR_Concept_ID,trxName);
+		m_GColor = getGColor(p_HR_Concept_ID,trxName);
+		m_BColor = getBColor(p_HR_Concept_ID,trxName);	
 	}
 	/**
 	 * 
@@ -215,20 +222,6 @@ public class JournalDay
 	}
 	/**
 	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:12
-	 * @param p_HR_Journal
-	 * @param trxName
-	 * @return
-	 * @return Timestamp
-	 */
-	protected Timestamp getTimeSlotStart(int p_HR_Journal, String trxName){
-		return DB.getSQLValueTS(trxName, "SELECT TimeSlotStart FROM " +
-				"HR_Journal " +
-				"Where HR_Journal_ID = ?", p_HR_Journal);
-	}
-	
-	/**
-	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:16
 	 * @param sql
 	 * @param trxName
@@ -257,25 +250,31 @@ public class JournalDay
 	}
 	
 	protected String generateJournalDay(String trxName){
-		 String k="";
+		 
 		 //	Org Info
-		// MOrgInfo orgInfo = null;
-		// orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
+		 MOrgInfo orgInfo = null;
+		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
 			JOptionPane.showMessageDialog(null, m_AD_Org_ID+" clientr ");
 			
-		// MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
-		// journalLine.setAD_Org_ID(m_AD_Org_ID);
+		 MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
+		 journalLine.setAD_Org_ID(m_AD_Org_ID);
 		
-		 //	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
+		 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 			for(int i = 0; i<m_HR_Concept_ID.size(); i++)
-				JOptionPane.showMessageDialog(null, m_HR_Concept_ID.get(i));
-			//	journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+				journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
 			for(int i = 0; i<m_StartHour.size(); i++){
-				JOptionPane.showMessageDialog(null, m_StartHour.get(i)+" hasta "+m_EndHour.get(i));
-			//	journalLine.setStartTime(m_StartHour.get(i));
-			//	journalLine.setEndTime(m_EndHour.get(i));
+				
+				JOptionPane.showMessageDialog(null,m_StartHour.get(i));
+				journalLine.setStartTime(m_StartHour.get(i));
+				journalLine.setEndTime(m_EndHour.get(i));
 			}
-		 return k;
+	
+			if (!journalLine.save())
+			{
+				journalLine = null;
+				
+			}
+		 return "Save";
 	}
 	
 }
