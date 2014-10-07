@@ -20,17 +20,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Vector;
 import java.util.logging.Level;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.compiere.model.MOrgInfo;
+import org.compiere.swing.CComboBox;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
+import org.spin.model.MHRDay;
 import org.spin.model.MHRJournal;
+import org.spin.model.MHRJournalDay;
 import org.spin.model.MHRJournalLine;
 
 /**
@@ -44,20 +50,9 @@ public class JournalDay
 	/**	Window No			*/
 	public int         		m_WindowNo = 0;
 
-	protected int 			m_HR_Journal_ID 		= 0;
+	protected int 			m_HR_Calendar_ID 		= 0;
 	protected int			m_HR_IncidenceGroup_ID  = 0;
-	/** Red Color			*/
-	protected int 			m_RColor				= 0;
-	/** Green Color			*/
-	protected int 			m_GColor				= 0;
-	/** Blue Color			*/
-	protected int 			m_BColor				= 0;
-	/** Start Time			*/
-	protected Timestamp 	m_TimeSlotStart 			= null;
-	/** End Time			*/
-	protected Timestamp 	m_TimeSlotEnd 				= null;
-//	protected Timestamp		m_StartHour				= null;
-//	protected Timestamp		m_EndHour				= null;
+	protected int 			m_C_Year_ID				=0;
 	/**	Client				*/
 	protected int 				m_AD_Client_ID = 0;
 	/**	Organization		*/
@@ -98,128 +93,30 @@ public class JournalDay
 			
 		return data;
 	}
-	protected ArrayList<KeyNamePair> getGroupIncidenceData(int p_HR_Journal_ID, String trxName){
-		String sql = "SELECT c.HR_Concept_ID, c.name FROM " +
-				"HR_JournalLine as jl " +
-				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
-				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" GROUP BY c.HR_Concept_ID";
-		return getData(sql, trxName);
+	
+	
+	protected Vector<Timestamp> getDayYear(int p_HR_Year_ID, String trxName){
+		Vector<Timestamp> columnNames = new Vector<Timestamp>();
+		
+		
+		try	{
+			PreparedStatement pstmt = DB.prepareStatement("SELECT HR_Day_ID, Date1  FROM HR_Day " +
+														  "WHERE C_Year_ID=?", null);
+			pstmt.setInt(1, p_HR_Year_ID);
+			ResultSet rs = pstmt.executeQuery();
+			//
+			while (rs.next()) {
+				columnNames.add(rs.getTimestamp(2));
+				
+			}
+			DB.close(rs, pstmt);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	
+		return columnNames;
 	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 01/10/2014, 14:37:48
-	 * @param p_HR_Journal_ID
-	 * @param trxName
-	 * @return
-	 * @return Timestamp
-	 */
-	protected Timestamp getStarHour(int p_HR_JournalLine_ID, String trxName){
-		return DB.getSQLValueTS(trxName, "SELECT jl.StartTime FROM " +
-		"HR_JournalLine as jl " +
-		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
-		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-		"WHERE jl.HR_JournalLine_ID=?", p_HR_JournalLine_ID);
-	}
-	protected void setSE_Hour(int p_HR_JournalLine_ID, String trxName){
-		m_StartHour.add(getStarHour(p_HR_JournalLine_ID, trxName));
-		m_EndHour.add(getEndHour(p_HR_JournalLine_ID, trxName));
-	}
-	protected Timestamp getEndHour(int p_HR_JournalLine_ID, String trxName){
-		return DB.getSQLValueTS(trxName, "SELECT jl.EndTime FROM " +
-		"HR_JournalLine as jl " +
-		"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
-		"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-		"WHERE jl.HR_journalLine_ID=?", p_HR_JournalLine_ID);
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:25
-	 * @param trxName
-	 * @return void
-	 */
-	protected void setTimeSlot(int p_HR_Journal, String trxName){
-		MHRJournal journal = new MHRJournal(Env.getCtx(), 0, trxName);
-		if(m_HR_Journal_ID != 0)
-			journal.setHR_Journal_ID(m_HR_Journal_ID);
-		if(m_HR_Journal_ID != 0){
-			m_TimeSlotStart = getTimeSlotStart(p_HR_Journal,trxName);
-			m_TimeSlotEnd = getTimeSlotEnd(p_HR_Journal,trxName);
-		} 
-	}	
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:02
-	 * @param p_HR_Journal
-	 * @param trxName
-	 * @return
-	 * @return Timestamp
-	 */
-	protected Timestamp getTimeSlotEnd(int p_HR_Journal, String trxName){
-		return DB.getSQLValueTS(trxName, "SELECT TimeSlotEnd FROM " +
-				"HR_Journal " +
-				"Where HR_Journal_ID = ?", p_HR_Journal);	
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:12
-	 * @param p_HR_Journal
-	 * @param trxName
-	 * @return
-	 * @return Timestamp
-	 */
-	protected Timestamp getTimeSlotStart(int p_HR_Journal, String trxName){
-		return DB.getSQLValueTS(trxName, "SELECT TimeSlotStart FROM " +
-				"HR_Journal " +
-				"Where HR_Journal_ID = ?", p_HR_Journal);
-	}
-	protected void setRGB(int p_HR_Concept_ID, String trxName){
-		m_RColor = getRColor(p_HR_Concept_ID,trxName);
-		m_GColor = getGColor(p_HR_Concept_ID,trxName);
-		m_BColor = getBColor(p_HR_Concept_ID,trxName);	
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return
-	 * @return int
-	 */
-	protected int getRColor(int p_HR_Concept_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT ig.red, igc.HR_Concept_ID " +
-				"FROM HR_IGConcept as igc " +
-				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return
-	 * @return int
-	 */
-	protected int getGColor(int p_HR_Concept_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT ig.green, igc.HR_Concept_ID " +
-				"FROM HR_IGConcept as igc " +
-				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return
-	 * @return int
-	 */
-	protected int getBColor(int p_HR_Concept_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT ig.blue, igc.HR_Concept_ID " +
-				"FROM HR_IGConcept as igc " +
-				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
-	}
+	
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 16:13:16
@@ -249,31 +146,29 @@ public class JournalDay
 		return data;
 	}
 	
-	protected String generateJournalDay(String trxName){
+	protected String generateJournalDay(JPanel[] slider, JButton[] hours, String trxName){
 		 
 		 //	Org Info
 		 MOrgInfo orgInfo = null;
 		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
-			JOptionPane.showMessageDialog(null, m_AD_Org_ID+" clientr ");
 			
 		 MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
 		 journalLine.setAD_Org_ID(m_AD_Org_ID);
 		
-		 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
-			for(int i = 0; i<m_HR_Concept_ID.size(); i++)
+		 	journalLine.setHR_Journal_ID(m_HR_Calendar_ID);
+			for(int i = 0; i<m_HR_Concept_ID.size(); i++){
 				journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-			for(int i = 0; i<m_StartHour.size(); i++){
-				
-				JOptionPane.showMessageDialog(null,m_StartHour.get(i));
-				journalLine.setStartTime(m_StartHour.get(i));
-				journalLine.setEndTime(m_EndHour.get(i));
+				for(int j = 0; j<slider[i].getComponentCount(); j++){
+					for(int x = 0; x<hours.length; x++){
+						if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
+							journalLine.setStartTime(m_StartHour.get(x));
+							journalLine.setEndTime(m_EndHour.get(x));
+							journalLine.saveEx();
+						}
+					}
+				}
 			}
-	
-			if (!journalLine.save())
-			{
-				journalLine = null;
-				
-			}
+			
 		 return "Save";
 	}
 	
