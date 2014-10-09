@@ -52,11 +52,12 @@ public class JournalDay
 
 	protected int 			m_HR_Calendar_ID 		= 0;
 	protected int			m_HR_IncidenceGroup_ID  = 0;
-	protected int 			m_C_Year_ID				=0;
+	protected int 			m_C_Year_ID				= 0;
 	/**	Client				*/
-	protected int 				m_AD_Client_ID = 0;
+	protected int 			m_AD_Client_ID 			= 0;
 	/**	Organization		*/
-	protected int 				m_AD_Org_ID = 0;
+	protected int 			m_AD_Org_ID 			= 0;
+	protected int			m_Year					= 0;
 	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
 
 	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
@@ -93,21 +94,33 @@ public class JournalDay
 			
 		return data;
 	}
-	
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 09/10/2014, 16:58:12
+	 * @param 
+	 * @param trxName
+	 * @return
+	 * @return ArrayList<KeyNamePair>
+	 */
+	protected ArrayList<KeyNamePair> getJournal(String trxName){
+		String sql = "SELECT HR_Journal_ID, name FROM " +
+				"HR_Journal";
+		return getData(sql, trxName);
+	}
 	
 	protected Vector<Timestamp> getDayYear(int p_HR_Year_ID, String trxName){
 		Vector<Timestamp> columnNames = new Vector<Timestamp>();
 		
 		
 		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT HR_Day_ID, Date1  FROM HR_Day " +
-														  "WHERE C_Year_ID=?", null);
+			PreparedStatement pstmt = DB.prepareStatement("SELECT fiscalYear, Date1  FROM HR_Day, C_Year " +
+														  "WHERE HR_Day.C_Year_ID=? and C_Year.C_Year_ID=HR_Day.C_Year_ID", null);
 			pstmt.setInt(1, p_HR_Year_ID);
 			ResultSet rs = pstmt.executeQuery();
 			//
 			while (rs.next()) {
 				columnNames.add(rs.getTimestamp(2));
-				
+				m_Year=rs.getInt(1);
 			}
 			DB.close(rs, pstmt);
 		} catch (SQLException e) {
