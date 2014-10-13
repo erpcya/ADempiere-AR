@@ -91,6 +91,7 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		catch(Exception e)
 		{
 			
+			
 		}
 	}
 	/**	Window No			*/
@@ -262,12 +263,12 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 	}
 	public void dyInit() throws Exception{
 		//	GET Journal
-		int AD_Column_ID = 1000077;		//	C_Order.C_BPartner_ID
+		int AD_Column_ID = 1000139;		//	HR_Journal.HR_Journal_ID
 		GridLayout experimentLayout = new GridLayout(0,24,0,0);
 		
-		MLookup lookupBPartner = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
+		MLookup lookupJournal = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		
-		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupBPartner);
+		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupJournal);
 		journalSearch.addVetoableChangeListener(this);
 		hoursPanel.setBackground(Color.BLUE);
 		hoursPanel.setMaximumSize(new Dimension(s_Hour*25, 15));
