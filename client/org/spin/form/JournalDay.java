@@ -58,6 +58,12 @@ public class JournalDay
 	/**	Organization		*/
 	protected int 			m_AD_Org_ID 			= 0;
 	protected int			m_Year					= 0;
+	/** Red Color			*/
+	protected int 			m_RColor				= 0;
+	/** Green Color			*/
+	protected int 			m_GColor				= 0;
+	/** Blue Color			*/
+	protected int 			m_BColor				= 0;
 	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
 
 	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
@@ -158,7 +164,57 @@ public class JournalDay
 		}
 		return data;
 	}
-	
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:43
+	 * @param p_HR_Concept_ID
+	 * @param trxName
+	 * @return void
+	 */
+	protected void setRGB(int p_HR_Journal_ID, String trxName){
+		m_RColor = getRColor(p_HR_Journal_ID,trxName);
+		m_GColor = getGColor(p_HR_Journal_ID,trxName);
+		m_BColor = getBColor(p_HR_Journal_ID,trxName);	
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:37
+	 * @param p_HR_Journal_ID
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getRColor(int p_HR_Journal_ID, String trxName){
+		return DB.getSQLValue(trxName, "SELECT red, HR_Journal_ID " +
+				"FROM HR_Journal " +
+				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:32
+	 * @param p_HR_Concept_ID
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getGColor(int p_HR_Journal_ID, String trxName){
+		return DB.getSQLValue(trxName, "SELECT green, HR_Journal_ID " +
+				"FROM HR_Journal " +
+				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
+	}
+	/**
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:25
+	 * @param p_HR_Concept_ID
+	 * @param trxName
+	 * @return
+	 * @return int
+	 */
+	protected int getBColor(int p_HR_Journal_ID, String trxName){
+		return DB.getSQLValue(trxName, "SELECT blue, HR_Journal_ID " +
+				"FROM HR_Journal " +
+				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
+	}
 	protected String generateJournalDay(JPanel[] slider, JButton[] hours, String trxName){
 		 
 		 //	Org Info

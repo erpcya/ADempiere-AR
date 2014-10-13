@@ -253,25 +253,26 @@ public class JournalLine {
 		 MOrgInfo orgInfo = null;
 		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
 			
-		 MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
-		 journalLine.setAD_Org_ID(m_AD_Org_ID);
-		
-		 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
-			for(int i = 0; i<m_HR_Concept_ID.size(); i++){
-				journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-				for(int j = 0; j<slider[i].getComponentCount(); j++){
-					for(int x = 0; x<hours.length; x++){
-						if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
-							journalLine.setStartTime(m_StartHour.get(x));
-							journalLine.setEndTime(m_EndHour.get(x));
-							journalLine.saveEx();
-						}
-						
+		 MHRJournalLine journalLine = null;
+		 
+		for(int i = 0; i<m_HR_Concept_ID.size(); i++){			
+			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
+			for(int j = 0; j<slider[i].getComponentCount(); j++){					
+				for(int x = 0; x<hours.length; x++){
+					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
+						journalLine.setStartTime(m_StartHour.get(x));
+						journalLine.setEndTime(m_EndHour.get(x));
 					}
-				
+					
+					journalLine.setAD_Org_ID(m_AD_Org_ID);
+					journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+				 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
+						journalLine.saveEx();
 				}
 				
 			}
+				
+		}
 			
 		 return "Save";
 	}
