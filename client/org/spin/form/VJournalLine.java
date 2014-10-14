@@ -263,7 +263,7 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 	}
 	public void dyInit() throws Exception{
 		//	GET Journal
-		int AD_Column_ID = 1000139;		//	HR_Journal.HR_Journal_ID
+		int AD_Column_ID = 1000177;		//	HR_Journal.HR_Journal_ID
 		GridLayout experimentLayout = new GridLayout(0,24,0,0);
 		
 		MLookup lookupJournal = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);

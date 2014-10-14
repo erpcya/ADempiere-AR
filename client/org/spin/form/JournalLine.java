@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.compiere.model.MOrgInfo;
@@ -262,12 +263,13 @@ public class JournalLine {
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
 						journalLine.setStartTime(m_StartHour.get(x));
 						journalLine.setEndTime(m_EndHour.get(x));
+
+						journalLine.setAD_Org_ID(m_AD_Org_ID);
+						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
+							journalLine.saveEx();
 					}
 					
-					journalLine.setAD_Org_ID(m_AD_Org_ID);
-					journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-				 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
-						journalLine.saveEx();
 				}
 				
 			}

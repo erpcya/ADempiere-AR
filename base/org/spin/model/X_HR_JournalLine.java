@@ -31,7 +31,7 @@ public class X_HR_JournalLine extends PO implements I_HR_JournalLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140929L;
+	private static final long serialVersionUID = 20141014L;
 
     /** Standard Constructor */
     public X_HR_JournalLine (Properties ctx, int HR_JournalLine_ID, String trxName)
