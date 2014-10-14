@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 import org.compiere.model.MOrgInfo;
 import org.compiere.swing.CComboBox;
@@ -64,6 +65,8 @@ public class JournalDay
 	protected int 			m_GColor				= 0;
 	/** Blue Color			*/
 	protected int 			m_BColor				= 0;
+
+	protected boolean 			m_m				= false;
 	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
 
 	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
@@ -114,18 +117,18 @@ public class JournalDay
 		return getData(sql, trxName);
 	}
 	
-	protected Vector<Timestamp> getDayYear(int p_HR_Year_ID, String trxName){
-		Vector<Timestamp> columnNames = new Vector<Timestamp>();
+	protected Vector<Integer> getDayYear(int p_HR_Year_ID, String trxName){
+		Vector<Integer> columnNames = new Vector<Integer>();
 		
 		
 		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT fiscalYear, Date1  FROM HR_Day, C_Year " +
+			PreparedStatement pstmt = DB.prepareStatement("SELECT fiscalYear, HR_Day_ID  FROM HR_Day, C_Year " +
 														  "WHERE HR_Day.C_Year_ID=? and C_Year.C_Year_ID=HR_Day.C_Year_ID", null);
 			pstmt.setInt(1, p_HR_Year_ID);
 			ResultSet rs = pstmt.executeQuery();
 			//
 			while (rs.next()) {
-				columnNames.add(rs.getTimestamp(2));
+				columnNames.add(rs.getInt(2));
 				m_Year=rs.getInt(1);
 			}
 			DB.close(rs, pstmt);
@@ -134,6 +137,34 @@ public class JournalDay
 		}
 	
 		return columnNames;
+	}
+	protected boolean getDayColor(int p_HR_day_ID, String trxName){
+
+		try	{
+			PreparedStatement pstmt = DB.prepareStatement("SELECT  jd.HR_Day_ID, blue, green, red  FROM HR_JournalDay as jd "+
+					"INNER JOIN HR_Calendar as c on(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
+					"INNER JOIN HR_Journal as j on(j.HR_Journal_ID=jd.HR_Journal_ID) " +
+					"INNER JOIN HR_Day as d on(d.HR_Day_ID=jd.HR_Day_ID) Where jd.HR_Day_ID=?", null);
+			pstmt.setInt(1, p_HR_day_ID);
+			ResultSet rs = pstmt.executeQuery();
+			//
+			if(rs.getRow()==0)
+				m_m=false;
+			else
+				m_m=true;
+			while (rs.next()) {
+				
+				m_RColor = rs.getInt(2);
+				m_GColor = rs.getInt(3);
+				m_BColor = rs.getInt(4);	
+				
+			}
+			DB.close(rs, pstmt);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return m_m;
+	
 	}
 	
 	/**
@@ -215,28 +246,30 @@ public class JournalDay
 				"FROM HR_Journal " +
 				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
 	}
-	protected String generateJournalDay(JPanel[] slider, JButton[] hours, String trxName){
+	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, String trxName){
 		 
 		 //	Org Info
 		 MOrgInfo orgInfo = null;
 		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
 			
-		 MHRJournalLine journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
-		 journalLine.setAD_Org_ID(m_AD_Org_ID);
 		
-		 	journalLine.setHR_Journal_ID(m_HR_Calendar_ID);
-			for(int i = 0; i<m_HR_Concept_ID.size(); i++){
-				journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-				for(int j = 0; j<slider[i].getComponentCount(); j++){
-					for(int x = 0; x<hours.length; x++){
-						if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
-							journalLine.setStartTime(m_StartHour.get(x));
-							journalLine.setEndTime(m_EndHour.get(x));
-							journalLine.saveEx();
-						}
-					}
+		for(int j = 0; j < p_journalButton.length; j++){
+			
+			for(int i = 0; i < p_dayButton.length; i++){ 
+				if(p_dayButton[i].getIconTextGap()==j){
+
+					 MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
+
+					 journalDay.setAD_Org_ID(m_AD_Org_ID);
+					journalDay.setHR_Calendar_ID(p_HR_Calendar_ID);
+					journalDay.setHR_Day_ID(Integer.parseInt(p_dayButton[i].getName()));
+					journalDay.setHR_Journal_ID(Integer.parseInt(p_journalButton[j].getName()));
+					journalDay.saveEx();
 				}
+					
+			 
 			}
+		}
 			
 		 return "Save";
 	}

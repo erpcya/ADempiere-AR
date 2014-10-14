@@ -31,7 +31,7 @@ public interface I_HR_IGConcept
     /** TableName=HR_IGConcept */
     public static final String Table_Name = "HR_IGConcept";
 
-    /** AD_Table_ID=1000011 */
+    /** AD_Table_ID=1000016 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);

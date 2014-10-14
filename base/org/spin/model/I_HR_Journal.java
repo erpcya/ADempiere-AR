@@ -50,6 +50,21 @@ public interface I_HR_Journal
 	  */
 	public int getAD_Client_ID();
 
+    /** Column name AD_Color_ID */
+    public static final String COLUMNNAME_AD_Color_ID = "AD_Color_ID";
+
+	/** Set System Color.
+	  * Color for backgrounds or indicators
+	  */
+	public void setAD_Color_ID (int AD_Color_ID);
+
+	/** Get System Color.
+	  * Color for backgrounds or indicators
+	  */
+	public int getAD_Color_ID();
+
+	public org.compiere.model.I_AD_Color getAD_Color() throws RuntimeException;
+
     /** Column name AD_Org_ID */
     public static final String COLUMNNAME_AD_Org_ID = "AD_Org_ID";
 
@@ -62,6 +77,45 @@ public interface I_HR_Journal
 	  * Organizational entity within client
 	  */
 	public int getAD_Org_ID();
+
+    /** Column name Blue */
+    public static final String COLUMNNAME_Blue = "Blue";
+
+	/** Set Blue.
+	  * Color RGB blue value
+	  */
+	public void setBlue (int Blue);
+
+	/** Get Blue.
+	  * Color RGB blue value
+	  */
+	public int getBlue();
+
+    /** Column name Blue_1 */
+    public static final String COLUMNNAME_Blue_1 = "Blue_1";
+
+	/** Set 2nd Blue.
+	  * RGB value for second color
+	  */
+	public void setBlue_1 (int Blue_1);
+
+	/** Get 2nd Blue.
+	  * RGB value for second color
+	  */
+	public int getBlue_1();
+
+    /** Column name ColorType */
+    public static final String COLUMNNAME_ColorType = "ColorType";
+
+	/** Set Color Type.
+	  * Color presentation for this color
+	  */
+	public void setColorType (String ColorType);
+
+	/** Get Color Type.
+	  * Color presentation for this color
+	  */
+	public String getColorType();
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -105,6 +159,32 @@ public interface I_HR_Journal
 	  */
 	public Timestamp getEndTime();
 
+    /** Column name Green */
+    public static final String COLUMNNAME_Green = "Green";
+
+	/** Set Green.
+	  * RGB value 
+	  */
+	public void setGreen (int Green);
+
+	/** Get Green.
+	  * RGB value 
+	  */
+	public int getGreen();
+
+    /** Column name Green_1 */
+    public static final String COLUMNNAME_Green_1 = "Green_1";
+
+	/** Set 2nd Green.
+	  * RGB value for second color
+	  */
+	public void setGreen_1 (int Green_1);
+
+	/** Get 2nd Green.
+	  * RGB value for second color
+	  */
+	public int getGreen_1();
+
     /** Column name HR_Journal_ID */
     public static final String COLUMNNAME_HR_Journal_ID = "HR_Journal_ID";
 
@@ -113,6 +193,19 @@ public interface I_HR_Journal
 
 	/** Get Journal	  */
 	public int getHR_Journal_ID();
+
+    /** Column name ImageAlpha */
+    public static final String COLUMNNAME_ImageAlpha = "ImageAlpha";
+
+	/** Set Image Alpha .
+	  * Image Texture Composite Alpha
+	  */
+	public void setImageAlpha (BigDecimal ImageAlpha);
+
+	/** Get Image Alpha .
+	  * Image Texture Composite Alpha
+	  */
+	public BigDecimal getImageAlpha();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -127,6 +220,32 @@ public interface I_HR_Journal
 	  */
 	public boolean isActive();
 
+    /** Column name LineDistance */
+    public static final String COLUMNNAME_LineDistance = "LineDistance";
+
+	/** Set Line Distance.
+	  * Distance between lines
+	  */
+	public void setLineDistance (int LineDistance);
+
+	/** Get Line Distance.
+	  * Distance between lines
+	  */
+	public int getLineDistance();
+
+    /** Column name LineWidth */
+    public static final String COLUMNNAME_LineWidth = "LineWidth";
+
+	/** Set Line Width.
+	  * Width of the lines
+	  */
+	public void setLineWidth (int LineWidth);
+
+	/** Get Line Width.
+	  * Width of the lines
+	  */
+	public int getLineWidth();
+
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
 
@@ -139,6 +258,58 @@ public interface I_HR_Journal
 	  * Alphanumeric identifier of the entity
 	  */
 	public String getName();
+
+    /** Column name Red */
+    public static final String COLUMNNAME_Red = "Red";
+
+	/** Set Red.
+	  * RGB value
+	  */
+	public void setRed (int Red);
+
+	/** Get Red.
+	  * RGB value
+	  */
+	public int getRed();
+
+    /** Column name Red_1 */
+    public static final String COLUMNNAME_Red_1 = "Red_1";
+
+	/** Set 2nd Red.
+	  * RGB value for second color
+	  */
+	public void setRed_1 (int Red_1);
+
+	/** Get 2nd Red.
+	  * RGB value for second color
+	  */
+	public int getRed_1();
+
+    /** Column name RepeatDistance */
+    public static final String COLUMNNAME_RepeatDistance = "RepeatDistance";
+
+	/** Set Repeat Distance.
+	  * Distance in points to repeat gradient color - or zero
+	  */
+	public void setRepeatDistance (int RepeatDistance);
+
+	/** Get Repeat Distance.
+	  * Distance in points to repeat gradient color - or zero
+	  */
+	public int getRepeatDistance();
+
+    /** Column name StartPoint */
+    public static final String COLUMNNAME_StartPoint = "StartPoint";
+
+	/** Set Start Point.
+	  * Start point of the gradient colors
+	  */
+	public void setStartPoint (String StartPoint);
+
+	/** Get Start Point.
+	  * Start point of the gradient colors
+	  */
+	public String getStartPoint();
 
     /** Column name StartTime */
     public static final String COLUMNNAME_StartTime = "StartTime";

@@ -33,7 +33,7 @@ public class X_HR_IncidenceGroup extends PO implements I_HR_IncidenceGroup, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20140929L;
+	private static final long serialVersionUID = 20141014L;
 
     /** Standard Constructor */
     public X_HR_IncidenceGroup (Properties ctx, int HR_IncidenceGroup_ID, String trxName)
@@ -41,13 +41,7 @@ public class X_HR_IncidenceGroup extends PO implements I_HR_IncidenceGroup, I_Pe
       super (ctx, HR_IncidenceGroup_ID, trxName);
       /** if (HR_IncidenceGroup_ID == 0)
         {
-			setBlue (0);
-			setColorType (null);
-			setGreen (0);
-			setLineDistance (0);
-			setLineWidth (0);
-			setRed (0);
-			setRepeatDistance (0);
+			setName (null);
         } */
     }
 

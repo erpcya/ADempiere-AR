@@ -31,7 +31,7 @@ public interface I_HR_JournalLine
     /** TableName=HR_JournalLine */
     public static final String Table_Name = "HR_JournalLine";
 
-    /** AD_Table_ID=1000004 */
+    /** AD_Table_ID=1000015 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
