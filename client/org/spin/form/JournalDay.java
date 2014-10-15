@@ -66,7 +66,7 @@ public class JournalDay
 	/** Blue Color			*/
 	protected int 			m_BColor				= 0;
 
-	protected boolean 			m_m				= false;
+
 	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
 
 	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
@@ -139,31 +139,28 @@ public class JournalDay
 		return columnNames;
 	}
 	protected boolean getDayColor(int p_HR_day_ID, String trxName){
-
+		boolean result=false;
 		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT  jd.HR_Day_ID, blue, green, red  FROM HR_JournalDay as jd "+
+			PreparedStatement pstmt = DB.prepareStatement("SELECT  jd.HR_Day_ID, red, green, blue  FROM HR_JournalDay as jd "+
 					"INNER JOIN HR_Calendar as c on(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
 					"INNER JOIN HR_Journal as j on(j.HR_Journal_ID=jd.HR_Journal_ID) " +
 					"INNER JOIN HR_Day as d on(d.HR_Day_ID=jd.HR_Day_ID) Where jd.HR_Day_ID=?", null);
 			pstmt.setInt(1, p_HR_day_ID);
 			ResultSet rs = pstmt.executeQuery();
 			//
-			if(rs.getRow()==0)
-				m_m=false;
-			else
-				m_m=true;
+			
+			
 			while (rs.next()) {
-				
 				m_RColor = rs.getInt(2);
 				m_GColor = rs.getInt(3);
 				m_BColor = rs.getInt(4);	
-				
+				result=true;
 			}
 			DB.close(rs, pstmt);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return m_m;
+		return result;
 	
 	}
 	
