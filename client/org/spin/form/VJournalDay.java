@@ -41,6 +41,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -93,7 +94,13 @@ public class VJournalDay extends JournalDay
 	/** 						*/
 	private CPanel 			mainPanel    	 = new CPanel();
 	private CPanel 			northPanel   	 = new CPanel();
-
+	private JPanel 			centerPanel		  = new JPanel();
+	private JPanel			rightPanel		  = new JPanel();
+	private JPanel 			journalPanel	  = new JPanel();
+	private GridLayout 		DayLayout 		  = new GridLayout(0,7);
+	private GridLayout 		JournalLayout 	  = new GridLayout(0,1);
+	
+	private JScrollPane 	scrollPane;
 	private String			trxName 		 = Trx.createTrxName("GM");
 	private Trx				trx 			 = null;
 	/** Calendar 				*/
@@ -102,36 +109,36 @@ public class VJournalDay extends JournalDay
 	/** Year 				*/
 	private JLabel 			yearLabel		  = new JLabel();
 	private VLookup 		yearSearch	      = null;
-
-
 	/** Save */
 	private JButton			bSave 	  		  = new JButton();
-	private JToggleButton[] 		dayButton;
-	private Calendar 		cal		  		  = Calendar.getInstance();
-	private JPanel 			centerPanel		  = new JPanel();
-	private JPanel			rightPanel		  = new JPanel();
-	private JPanel 			journalPanel	  = new JPanel();
-	private GridLayout 		DayLayout 		  = new GridLayout(0,7);
-	private GridLayout 		JournalLayout 	  = new GridLayout(0,1);
-	private Vector<Integer> dayYear	  	  = null;
-	private	JButton 		monday		   = null;
-	private	JButton 		tuesday		   = null;
-	private	JButton 		wednesday	   = null;
-	private	JButton 		thursday	   = null;
-	private	JButton 		friday		   = null;
-	private	JButton 		saturday	   = null;
-	private	JButton 		sunday		   = null;
-	private	int				startDay	   = 0;
-	private	int				cont	   = 0;
-	private int cols=0;
-	private int row=0;
-
-	int a[][]=null;
+	/** Day Calendar */
+	private JToggleButton[] dayButton;
+	private Vector<Integer> dayYear	  	  	  = null;
+	private Calendar 		cal				  = Calendar.getInstance();
+	/** Day Week */
+	private	JButton 		monday		   	  = null;
+	private	JButton 		tuesday		  	  = null;
+	private	JButton 		wednesday	 	  = null;
+	private	JButton 		thursday	 	  = null;
+	private	JButton 		friday		 	  = null;
+	private	JButton 		saturday	 	  = null;
+	private	JButton 		sunday		 	  = null;
+	/**	First Day */
+	private	int				startDay	 	  = 0;
+	/** Count Day */
+	private	int				count	  	  	  = 0;
+	/** cols and row calendar */
+	private int 			cols			  = 0;
+	private int 			row				  = 0;
+	/** formatter Month */
 	private SimpleDateFormat formatter = new SimpleDateFormat("MMMM");
 	private JButton[] journalButton;
+	/**  Month */
 	private Date month = null;
 	JLabel journalLabel = new JLabel();
-	private void jbInit() {
+	
+	private void jbInit() throws Exception
+	{
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
 		mainPanel.setMinimumSize(new Dimension(500, 500));
@@ -155,7 +162,13 @@ public class VJournalDay extends JournalDay
        	centerPanel.setLayout(new GridBagLayout());
        	centerPanel.setPreferredSize(new Dimension(900, 800));
        	rightPanel.setLayout(JournalLayout);
-		mainPanel.add(northPanel, BorderLayout.NORTH);
+       	//	Scroll Panel
+    	
+       	scrollPane = new JScrollPane(journalPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
+	            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+       	rightPanel.add(scrollPane);
+			
+       	mainPanel.add(northPanel, BorderLayout.NORTH);
 		mainPanel.add(centerPanel, BorderLayout.CENTER);
 		mainPanel.add(rightPanel, BorderLayout.EAST);
 		
@@ -173,73 +186,66 @@ public class VJournalDay extends JournalDay
 		MLookup lookupYear = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		yearSearch = new VLookup("C_Year_ID", true, false, true, lookupYear);
 		yearSearch.addVetoableChangeListener(this);
-
-
-		journalLabel.setText("Jornadas:");
+		
+		journalPanel.setPreferredSize(new Dimension(200,20));
+		journalLabel.setText(" Jornadas: ");
 		journalLabel.setPreferredSize(new Dimension(200,20));
 		journalPanel.add(journalLabel);
+		//	Get Journal
 		ArrayList<KeyNamePair> dataIG = getJournal(trxName);
-		calendarLabel.addMouseListener(this);
 		journalButton = new JButton[dataIG.size()];
-		journalPanel.setPreferredSize(new Dimension(200,20));
+		
 		for(KeyNamePair pp : dataIG) {
-			JLabel colors = new JLabel();
-			colors.setPreferredSize(new Dimension(20,30));
+			JLabel colorsLabel = new JLabel();
+			colorsLabel.setPreferredSize(new Dimension(20,18));
 
 			journalButton[i] = new JButton();
 			journalButton[i].setText(pp.toString());
 			journalButton[i].setName(pp.getID().toString());
 			journalButton[i].addActionListener(this);
 
+			// Get Color
 			setRGB(Integer.parseInt(journalButton[i].getName()),trxName);
-			colors.setBackground(new Color(m_RColor, m_GColor, m_BColor));
-			colors.setOpaque(true);
-			journalPanel.add(colors);
-			journalButton[i].setPreferredSize(new Dimension(170,30));
-			journalPanel.add(journalButton[i]);
-			
+			colorsLabel.setBackground(new Color(m_RColor, m_GColor, m_BColor));
+			colorsLabel.setOpaque(true);
+			journalPanel.add(colorsLabel);
+			journalButton[i].setPreferredSize(new Dimension(170,20));
+			journalPanel.add(journalButton[i]);			
 			i++;
 		}
 		rightPanel.add(journalPanel);
 	}
 
 	 public void dayMonth(int year, int month) {
-		 
 		  startDay = getStartDay(year, month);
-	 
-	      int numberOfDaysInMonth = getNumberOfDaysInMonth(year, month);
-	 
-	      // Pad space before the first day of the month
-	      int i = 0;
-	      
+	      int numberOfDaysInMonth = getNumberOfDaysInMonth(year, month);	 
 	      JPanel 	dayNumPanel = new JPanel();
-	      dayNumPanel.setMaximumSize(new Dimension(200,300));
-	      dayNumPanel.setPreferredSize(new Dimension(200,150));
+	      dayNumPanel.setMaximumSize(new Dimension(200,180));
+	      dayNumPanel.setPreferredSize(new Dimension(200,180));
 	      dayNumPanel.setLayout(DayLayout);
 	      
-	      for (i = 0; i < startDay; i++){
+	      //	Pad space before the first day of the month
+	      for (int i = 0; i < startDay; i++){
 	    	  JLabel dayMonthLabel = new JLabel();
 	    	  dayMonthLabel.setText("   ");
 	    	  dayNumPanel.add(dayMonthLabel);
 	      }
-	      for (i = 1; i <= numberOfDaysInMonth; i++) {
-	    	  getDayColor(dayYear.get(cont), trxName);
-	    	  if(m_m==true){
-	    		  dayButton[cont].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+	      //	Print days Button
+	      for (int  i = 1; i <= numberOfDaysInMonth; i++) {
+	    	  dayButton[count] = new JToggleButton();
+	    	  if(getDayColor(dayYear.get(count), trxName)==true){
+	    		  dayButton[count].setBackground(new Color(m_RColor, m_GColor, m_BColor));
 	    	  }
-	    	  dayButton[cont] = new JToggleButton();
-	    	  dayButton[cont].setText(String.valueOf(i));
-	    	  dayButton[cont].setName(dayYear.get(cont).toString());
-	    	  dayButton[cont].setMaximumSize(new Dimension(10,10));
-	    	  dayNumPanel.add(dayButton[cont]);
-
-				
-	    	  cont++;
+	    	  dayButton[count].setText(String.valueOf(i));
+	    	  dayButton[count].setName(dayYear.get(count).toString());
+	    	  dayButton[count].setMaximumSize(new Dimension(10,20));
+	    	  dayButton[count].setPreferredSize(new Dimension(10,20));
+	    	  dayNumPanel.add(dayButton[count]);
+	    	  count++;
 	      }	
 	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, row+2, 1, 1, 0.0, 0.0
 					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
 	   }
-	 
 	 
 	  @Override
 	  public void mousePressed(MouseEvent e) {
@@ -250,9 +256,9 @@ public class VJournalDay extends JournalDay
 	public void stateChanged(ChangeEvent e) {
 	
 	}
-	
+	@Override
 	public void actionPerformed(ActionEvent e){
-		int start=12;
+		//	asign journal in day button
 		for(int i = 0; i < journalButton.length; i++){ 
 			if(e.getActionCommand().equals(journalButton[i].getText())){
 				setRGB(Integer.parseInt(journalButton[i].getName()),trxName);
@@ -266,16 +272,9 @@ public class VJournalDay extends JournalDay
 			
 			}
 		}
-		if(e.getActionCommand().equals(saturday.getText())){
-			start=10-startDay;
-			for(int i = start; i < 365; i+=7){
-				dayButton[i].setBackground(Color.RED);
-			}
-		}
 		if(e.getActionCommand().equals(bSave.getText())){
 			saveData();
 		}
-		
 	} 	//  actionPerformed
 	@Override
 	public void dispose() {
@@ -297,20 +296,14 @@ public class VJournalDay extends JournalDay
 	public void mouseExited(MouseEvent e) {   
 	
 	}	
-
 	@Override
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 		Object value = evt.getNewValue();
 		if(evt.getSource().equals(calendarSearch)){
 			m_HR_Calendar_ID=(Integer) calendarSearch.getValue();
-			
 		}
-//		if(evt.getSource().equals(journalSearch)){
-//			setRGB((Integer) journalSearch.getValue(),trxName);
-//		}
 		if(evt.getSource().equals(yearSearch)){
 			clearData();
-			
 			m_C_Year_ID = ((Integer)value).intValue();
 			dayYear 	= getDayYear(m_C_Year_ID, trxName);
 			if(dayYear.size()==0){
@@ -319,7 +312,7 @@ public class VJournalDay extends JournalDay
 			else{
 				dayButton = new JToggleButton[dayYear.size()];
 				for(int x = 1; x<13; x++){
-			      JPanel 	dayTitlePanel  = new JPanel();
+					JPanel 	dayTitlePanel  = new JPanel();
 			       	JLabel  monthLabel	   = new JLabel();
 			    	JPanel 	monthYearPanel = new JPanel();
 			    	monday		   = new JButton("L ");
@@ -374,12 +367,12 @@ public class VJournalDay extends JournalDay
 	}
 	
 	public void clearData(){
-					startDay	   = 0;
-						cont	   = 0;
-		 cols=0;
-		 row=0;
-		 centerPanel.removeAll();
-		 centerPanel.repaint();
+		startDay	   = 0;
+		count	   = 0;
+		cols=0;
+		row=0;
+		centerPanel.removeAll();
+		centerPanel.repaint();
 	}
 	/**
 	 * Save Data
@@ -388,62 +381,81 @@ public class VJournalDay extends JournalDay
 	 */
 	public void saveData(){
 		String msg = saveCalendar(m_HR_Calendar_ID, journalButton, dayButton, trxName);
-		
 		trx.commit();
 		ADialog.info(m_WindowNo, mainPanel, null, msg);
 		centerPanel.removeAll();
 		rightPanel.repaint();
 		clearData();
 	}
-	   /** Get the start day of the first day in a month */
-	 
-		public int getStartDay(int year, int month) {
-		 
-		      //Get total number of days since 1/1/1800
-		      int startDay1800 = 3;
-		      int totalNumberOfDays = getTotalNumberOfDays(year, month);
-		 
-		      //Return the start day
-		      return (totalNumberOfDays + startDay1800) % 7;
-		    }
-		 
-		    /** Get the total number of days since January 1, 1800 */
-		 
-		public int getTotalNumberOfDays(int year, int month) {
-		     int total = 0;
-		 
-		     //Get the total days from 1800 to year - 1
-		     for (int i = 1800; i < year; i++)
-		     if (isLeapYear(i))
-		        total = total + 366;
-		      else
-		        total = total + 365;
-		 
+	   
+		/** Get the start day of the first day in a month
+		 * 
+		 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:34:57
+		 * @param year
+		 * @param month
+		 * @return
+		 * @return int
+  		*/
+	public int getStartDay(int year, int month) {
+	      //Get total number of days since 1/1/1800
+	      int startDay1800 = 3;
+	      int totalNumberOfDays = getTotalNumberOfDays(year, month);
+	      //Return the start day
+	      return (totalNumberOfDays + startDay1800) % 7;
+    }
+		    
+	/** Get the total number of days since January 1, 1800 
+	 * 	 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:35:31
+	 * @param year
+	 * @param month
+	 * @return
+	 * @return int
+	 */
+	public int getTotalNumberOfDays(int year, int month) {
+	     int total = 0;
+	     //Get the total days from 1800 to year - 1
+	     for (int i = 1800; i < year; i++)
+	     if (isLeapYear(i))
+	        total = total + 366;
+	      else
+	        total = total + 365;
 		      //Add days from January to the month prior to the calendar month
-		      for (int i = 1; i < month; i++)
-		        total = total + getNumberOfDaysInMonth(year, i);
-		 
+	      for (int i = 1; i < month; i++)
+	        total = total + getNumberOfDaysInMonth(year, i);
 		      return total;
-		    }
+    }
 		 
-		    /** Get the number of days in a month */
+	/** Get the number of days in a month
+	 * 		 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:36:20
+	 * @param year
+	 * @param month
+	 * @return
+	 * @return int
+	 */
+	public int getNumberOfDaysInMonth(int year, int month) {
+	      if (month == 1 || month == 3 || month == 5 || month == 7 ||
+	        month == 8 || month == 10 || month == 12)
+	        return 31;
+ 
+	      if (month == 4 || month == 6 || month == 9 || month == 11)
+	        return 30;
 		 
-		public int getNumberOfDaysInMonth(int year, int month) {
-		      if (month == 1 || month == 3 || month == 5 || month == 7 ||
-		        month == 8 || month == 10 || month == 12)
-		        return 31;
+	      if (month == 2) return isLeapYear(year) ? 29 : 28;
+
+	      return 0; // If month is incorrect
+	}
 		 
-		      if (month == 4 || month == 6 || month == 9 || month == 11)
-		        return 30;
-		 
-		      if (month == 2) return isLeapYear(year) ? 29 : 28;
-		 
-		      return 0; // If month is incorrect
-		    }
-		 
-		    /** Determine if it is a leap year */
-		public boolean isLeapYear(int year) {
-		      return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
-		    }
+	 /** Determine if it is a leap year
+	  * 
+	  *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:37:13
+	  * @param year
+	  * @return
+	  * @return boolean
+	  */
+	public boolean isLeapYear(int year) {
+	      return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
+	}
 		
 }

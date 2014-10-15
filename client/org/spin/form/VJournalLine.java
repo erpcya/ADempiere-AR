@@ -163,9 +163,6 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 	private float 		fstart_Hour		 = 0;
 	private float 		fend_Hour		 = 0;
 	Calendar cal2 = Calendar.getInstance();
-	
-	
-	
 
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
