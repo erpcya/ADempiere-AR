@@ -24,10 +24,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.compiere.model.MOrgInfo;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
@@ -42,7 +40,6 @@ import org.spin.model.MHRJournalLine;
 public class JournalLine {
 	/**	Window No			*/
 	public int         		m_WindowNo = 0;
-
 	protected int 			m_HR_Journal_ID 		= 0;
 	protected int			m_HR_IncidenceGroup_ID  = 0;
 	/** Red Color			*/
@@ -55,14 +52,11 @@ public class JournalLine {
 	protected Timestamp 	m_TimeSlotStart 			= null;
 	/** End Time			*/
 	protected Timestamp 	m_TimeSlotEnd 				= null;
-//	protected Timestamp		m_StartHour				= null;
-//	protected Timestamp		m_EndHour				= null;
 	/**	Client				*/
 	protected int 				m_AD_Client_ID = 0;
 	/**	Organization		*/
 	protected int 				m_AD_Org_ID = 0;
 	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
-
 	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
 	protected ArrayList<Timestamp> 			m_EndHour			= new ArrayList<Timestamp>();
 	/**	Logger			*/
@@ -78,14 +72,11 @@ public class JournalLine {
 				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
 				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" and jl.HR_Concept_ID="+p_HR_Concept_ID);
 		try	{
-			
 			PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null);
-			
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next())
 			{
 				m_AD_Org_ID=rs.getInt("AD_Org_ID");
-				
 				data.add(new KeyNamePair(rs.getInt("HR_JournalLine_ID"), rs.getString("description")));
 			}
 			rs.close();
@@ -94,7 +85,6 @@ public class JournalLine {
 		catch (SQLException e){
 			log.log(Level.SEVERE, sql.toString(), e);
 		}
-			
 		return data;
 	}
 	protected ArrayList<KeyNamePair> getGroupIncidenceData(int p_HR_Journal_ID, String trxName){
@@ -172,11 +162,7 @@ public class JournalLine {
 				"HR_Journal " +
 				"Where HR_Journal_ID = ?", p_HR_Journal);
 	}
-	protected void setRGB(int p_HR_Concept_ID, String trxName){
-		m_RColor = getRColor(p_HR_Concept_ID,trxName);
-		m_GColor = getGColor(p_HR_Concept_ID,trxName);
-		m_BColor = getBColor(p_HR_Concept_ID,trxName);	
-	}
+	
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
@@ -185,11 +171,23 @@ public class JournalLine {
 	 * @return
 	 * @return int
 	 */
-	protected int getRColor(int p_HR_Concept_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT ig.red, igc.HR_Concept_ID " +
+	protected void getColor(int p_HR_Concept_ID, String trxName){
+		try	{
+			PreparedStatement pstmt = DB.prepareStatement("SELECT ig.red, ig.green, ig.blue, igc.HR_Concept_ID " +
 				"FROM HR_IGConcept as igc " +
 				"INNER JOIN HR_IncidenceGroup as ig on(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID) " +
-				"WHERE igc.HR_Concept_ID=?", p_HR_Concept_ID);
+				"WHERE igc.HR_Concept_ID=?", null);
+			pstmt.setInt(1, p_HR_Concept_ID);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				m_RColor = rs.getInt(1);
+				m_GColor = rs.getInt(2);
+				m_BColor = rs.getInt(3);	
+			}
+			DB.close(rs, pstmt);
+		} catch (SQLException e) {
+				e.printStackTrace();
+			}
 	}
 	/**
 	 * 
@@ -229,18 +227,16 @@ public class JournalLine {
 	 */
 	private ArrayList<KeyNamePair> getData(String sql, String trxName){
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
-		
 		log.config("getData");
 		
 		try	{
 			PreparedStatement pstmt = DB.prepareStatement(sql, trxName);
 			ResultSet rs = pstmt.executeQuery();
-			//
+
 			while (rs.next()) {
 				data.add(new KeyNamePair(rs.getInt(1), rs.getString(2)));
 			}
 			rs.close();
-			
 			pstmt.close();
 		} catch (SQLException e) {
 			log.log(Level.SEVERE, sql, e);
@@ -249,33 +245,22 @@ public class JournalLine {
 	}
 	
 	protected String saveJournalLine(JPanel[] slider, JButton[] hours, String trxName){
-		 
-		 //	Org Info
-		 MOrgInfo orgInfo = null;
-		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
-			
-		 MHRJournalLine journalLine = null;
-		 
+		MHRJournalLine journalLine = null;
 		for(int i = 0; i<m_HR_Concept_ID.size(); i++){			
 			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
+			journalLine.setAD_Org_ID(m_AD_Org_ID);
+			journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+		 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 			for(int j = 0; j<slider[i].getComponentCount(); j++){					
 				for(int x = 0; x<hours.length; x++){
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
 						journalLine.setStartTime(m_StartHour.get(x));
 						journalLine.setEndTime(m_EndHour.get(x));
-
-						journalLine.setAD_Org_ID(m_AD_Org_ID);
-						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
-							journalLine.saveEx();
+						journalLine.saveEx();
 					}
-					
 				}
-				
 			}
-				
 		}
-			
 		 return "Save";
 	}
 }
