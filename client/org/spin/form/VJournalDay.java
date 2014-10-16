@@ -16,7 +16,6 @@
  *****************************************************************************/
 package org.spin.form;
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -37,6 +36,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -66,12 +66,10 @@ import org.compiere.util.Trx;
  */
 public class VJournalDay extends JournalDay
 			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener {
-
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
 		
 		m_WindowNo = WindowNo;
-			m_frame = frame;
 		Env.setContext(Env.getCtx(), m_WindowNo, "IsSOTrx", "Y");   //  defaults to no
 		trx = Trx.get(trxName, true);
 		try
@@ -79,30 +77,31 @@ public class VJournalDay extends JournalDay
 			dyInit();
 			jbInit();
 			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
+			frame.getContentPane().add(southPanel, BorderLayout.SOUTH);
 		}
-		catch(Exception e)
-		{
-			
+		catch(Exception e){
 		}
 	}
-	/**	Window No			*/
+	/**	Window No				*/
 	private int         	m_WindowNo = 0;
-	/**	FormFrame			*/
-	private FormFrame 		m_frame;
 	private BorderLayout 	mainLayout = new BorderLayout();
-
-	/** 						*/
-	private CPanel 			mainPanel    	 = new CPanel();
-	private CPanel 			northPanel   	 = new CPanel();
+	/** 	Panel				*/
+	private CPanel 			mainPanel    	  = new CPanel();
+	private CPanel 			northPanel   	  = new CPanel();
 	private JPanel 			centerPanel		  = new JPanel();
 	private JPanel			rightPanel		  = new JPanel();
+	private JPanel 			southPanel	  	  = new JPanel();
 	private JPanel 			journalPanel	  = new JPanel();
+	private JPanel 			dayTitlePanel     = new JPanel();
+	private JPanel 			monthYearPanel    = new JPanel();
+	private JPanel 	  		dayNumPanel 	  = new JPanel();
 	private GridLayout 		DayLayout 		  = new GridLayout(0,7);
 	private GridLayout 		JournalLayout 	  = new GridLayout(0,1);
-	
+	/** 						*/
+	private String			trxName 		  = Trx.createTrxName("GM");
+	private Trx				trx 			  = null;
+	/** Scroll */
 	private JScrollPane 	scrollPane;
-	private String			trxName 		 = Trx.createTrxName("GM");
-	private Trx				trx 			 = null;
 	/** Calendar 				*/
 	private JLabel 			calendarLabel     = new JLabel();
 	private VLookup 		calendarSearch    = null;
@@ -110,32 +109,31 @@ public class VJournalDay extends JournalDay
 	private JLabel 			yearLabel		  = new JLabel();
 	private VLookup 		yearSearch	      = null;
 	/** Save */
-	private JButton			bSave 	  		  = new JButton();
+	private JButton			saveButton		  = new JButton();
 	/** Day Calendar */
 	private JToggleButton[] dayButton;
 	private Vector<Integer> dayYear	  	  	  = null;
 	private Calendar 		cal				  = Calendar.getInstance();
-	/** Day Week */
-	private	JButton 		monday		   	  = null;
-	private	JButton 		tuesday		  	  = null;
-	private	JButton 		wednesday	 	  = null;
-	private	JButton 		thursday	 	  = null;
-	private	JButton 		friday		 	  = null;
-	private	JButton 		saturday	 	  = null;
-	private	JButton 		sunday		 	  = null;
 	/**	First Day */
 	private	int				startDay	 	  = 0;
 	/** Count Day */
 	private	int				count	  	  	  = 0;
-	/** cols and row calendar */
+	/** cols and rows calendar */
 	private int 			cols			  = 0;
-	private int 			row				  = 0;
-	/** formatter Month */
-	private SimpleDateFormat formatter = new SimpleDateFormat("MMMM");
-	private JButton[] journalButton;
+	private int 			rows			  = 0;
+	/** formatter Month 	*/
+	private SimpleDateFormat mFormatter 	  = new SimpleDateFormat("MMMM");
+	/** formatter Day 		*/
+	private SimpleDateFormat dFormatter 	  = new SimpleDateFormat("E");
+	/** Journal 			*/
+	private JButton[] 		journalButton	  = null;
+	private JLabel 			colorLabel 	  	  = new JLabel();
 	/**  Month */
-	private Date month = null;
-	JLabel journalLabel = new JLabel();
+	private JLabel  	    monthLabel		  = null;
+	/** Day Week */
+	private JLabel  	    dayLabel		  = null;
+	private Date 		    getDate 		  = null;
+	private JLabel		    journalLabel	  = new JLabel();
 	
 	private void jbInit() throws Exception
 	{
@@ -146,49 +144,46 @@ public class VJournalDay extends JournalDay
 		northPanel.setLayout(new GridBagLayout());	
 		calendarLabel.setText(Msg.translate(Env.getCtx(), "Calendar"));
 		yearLabel.setText(Msg.translate(Env.getCtx(), "Year"));
-		bSave.setText(Msg.translate(Env.getCtx(), "Save"));
-		bSave.addActionListener(this);
+		saveButton.setText(Msg.translate(Env.getCtx(), "Save"));
+		saveButton.addActionListener(this);
 		northPanel.add(calendarLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0)); 
 		northPanel.add(calendarSearch, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(bSave, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0
+		northPanel.add(yearLabel, new GridBagConstraints(2, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(yearLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
-				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(yearSearch, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
+		northPanel.add(yearSearch, new GridBagConstraints(3, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
 
        	centerPanel.setLayout(new GridBagLayout());
        	centerPanel.setPreferredSize(new Dimension(900, 800));
-       	rightPanel.setLayout(JournalLayout);
+       	centerPanel.setBorder(BorderFactory.createEtchedBorder());
        	//	Scroll Panel
-    	
        	scrollPane = new JScrollPane(journalPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
-	            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+       								 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+       	rightPanel.setLayout(JournalLayout);
        	rightPanel.add(scrollPane);
-			
        	mainPanel.add(northPanel, BorderLayout.NORTH);
 		mainPanel.add(centerPanel, BorderLayout.CENTER);
 		mainPanel.add(rightPanel, BorderLayout.EAST);
-		
+		southPanel.add(saveButton);
 	}
 	public void dyInit() throws Exception{
-		//	GET Journal
+		
+		//	GET Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
 		int i=0;
 		MLookup lookupCalendar = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
-		
 		calendarSearch = new VLookup("HR_Calendar_ID", true, false, true, lookupCalendar);
 		calendarSearch.addVetoableChangeListener(this);
-	
-		AD_Column_ID = 54927;		//	HR_Year.HR_Year_Id
+		//	GET Year
+		AD_Column_ID = 54927;		//	HR_Year.HR_Year_Id	
 		MLookup lookupYear = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		yearSearch = new VLookup("C_Year_ID", true, false, true, lookupYear);
-		yearSearch.addVetoableChangeListener(this);
+		yearSearch.addVetoableChangeListener(this);	
 		
-		journalPanel.setPreferredSize(new Dimension(200,20));
-		journalLabel.setText(" Jornadas: ");
+		journalPanel.setPreferredSize(new Dimension(200,20));																
+		journalLabel.setText(" Jornadas: ");			
 		journalLabel.setPreferredSize(new Dimension(200,20));
 		journalPanel.add(journalLabel);
 		//	Get Journal
@@ -196,19 +191,18 @@ public class VJournalDay extends JournalDay
 		journalButton = new JButton[dataIG.size()];
 		
 		for(KeyNamePair pp : dataIG) {
-			JLabel colorsLabel = new JLabel();
-			colorsLabel.setPreferredSize(new Dimension(20,18));
-
+			colorLabel = new JLabel();
+			colorLabel.setPreferredSize(new Dimension(20,18));
+			
 			journalButton[i] = new JButton();
 			journalButton[i].setText(pp.toString());
 			journalButton[i].setName(pp.getID().toString());
 			journalButton[i].addActionListener(this);
-
 			// Get Color
-			setRGB(Integer.parseInt(journalButton[i].getName()),trxName);
-			colorsLabel.setBackground(new Color(m_RColor, m_GColor, m_BColor));
-			colorsLabel.setOpaque(true);
-			journalPanel.add(colorsLabel);
+			getColor(Integer.parseInt(journalButton[i].getName()),trxName);
+			colorLabel.setBackground(new Color(m_RColor, m_GColor, m_BColor));
+			colorLabel.setOpaque(true);
+			journalPanel.add(colorLabel);
 			journalButton[i].setPreferredSize(new Dimension(170,20));
 			journalPanel.add(journalButton[i]);			
 			i++;
@@ -216,14 +210,14 @@ public class VJournalDay extends JournalDay
 		rightPanel.add(journalPanel);
 	}
 
-	 public void dayMonth(int year, int month) {
+	public void dayMonth(int year, int month) {
 		  startDay = getStartDay(year, month);
 	      int numberOfDaysInMonth = getNumberOfDaysInMonth(year, month);	 
-	      JPanel 	dayNumPanel = new JPanel();
-	      dayNumPanel.setMaximumSize(new Dimension(200,180));
-	      dayNumPanel.setPreferredSize(new Dimension(200,180));
+	      dayNumPanel = new JPanel();
+	      dayNumPanel.setPreferredSize(new Dimension(200,120));
+	      dayNumPanel.setMaximumSize(new Dimension(200,121));
 	      dayNumPanel.setLayout(DayLayout);
-	      
+
 	      //	Pad space before the first day of the month
 	      for (int i = 0; i < startDay; i++){
 	    	  JLabel dayMonthLabel = new JLabel();
@@ -233,7 +227,7 @@ public class VJournalDay extends JournalDay
 	      //	Print days Button
 	      for (int  i = 1; i <= numberOfDaysInMonth; i++) {
 	    	  dayButton[count] = new JToggleButton();
-	    	  if(getDayColor(dayYear.get(count), trxName)==true){
+	    	  if(getDayColor(dayYear.get(count), m_HR_Calendar_ID,m_C_Year_ID, trxName)==true){
 	    		  dayButton[count].setBackground(new Color(m_RColor, m_GColor, m_BColor));
 	    	  }
 	    	  dayButton[count].setText(String.valueOf(i));
@@ -242,26 +236,59 @@ public class VJournalDay extends JournalDay
 	    	  dayButton[count].setPreferredSize(new Dimension(10,20));
 	    	  dayNumPanel.add(dayButton[count]);
 	    	  count++;
-	      }	
-	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, row+2, 1, 1, 0.0, 0.0
+	      }
+	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, rows+2, 1, 1, 0.0, 0.0
 					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-	   }
-	 
+	} // Day Month
+	
+	public void generateDay(){
+		 dayButton = new JToggleButton[dayYear.size()];
+			for(int x = 1; x<13; x++){
+				dayTitlePanel  = new JPanel();
+		       	monthLabel	   = new JLabel();
+		    	monthYearPanel = new JPanel();
+		    	
+				cal.set(m_Year, x-1, 1);
+				getDate = cal.getTime();
+		    	monthLabel.setText(mFormatter.format(getDate));
+				monthYearPanel.add(monthLabel);
+				
+				dayTitlePanel.setPreferredSize(new Dimension(200,20));
+				dayTitlePanel.add(monthYearPanel);
+				dayTitlePanel.setLayout(new GridLayout(0, 7));
+				for(int i = 0; i<7; i++){
+					dayLabel	= new JLabel(dFormatter.format(getDate));
+					cal.set(2014, 8, i);
+					getDate 	= cal.getTime();
+			       	dayLabel.setText(" "+dFormatter.format(getDate));
+			       	dayLabel.setMaximumSize(new Dimension(10,20));
+			       	dayLabel.setPreferredSize(new Dimension(10,20));
+			       	dayTitlePanel.add(dayLabel);
+				}
+		        if(cols==4){ 
+		        	rows=x; cols=0;     
+		        }
+		        centerPanel.add(monthYearPanel,  new GridBagConstraints(cols, rows, 1, 1, 0.0, 0.0
+     			   		,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			    centerPanel.add(dayTitlePanel,  new GridBagConstraints(cols, rows+1, 1, 1, 0.0, 0.0
+						,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
+			   //	Print Day Month
+			   dayMonth(m_Year,x);
+			   cols++;	
+			}
+	} //  generateDay
 	  @Override
-	  public void mousePressed(MouseEvent e) {
-		 
-	    }
-
+	public void mousePressed(MouseEvent e) {
+	}
 	@Override
 	public void stateChanged(ChangeEvent e) {
-	
 	}
 	@Override
 	public void actionPerformed(ActionEvent e){
-		//	asign journal in day button
+		//	Asign journal in day button
 		for(int i = 0; i < journalButton.length; i++){ 
 			if(e.getActionCommand().equals(journalButton[i].getText())){
-				setRGB(Integer.parseInt(journalButton[i].getName()),trxName);
+				getColor(Integer.parseInt(journalButton[i].getName()),trxName);
 				for(int j = 0; j < dayButton.length; j++){
 					if(dayButton[j].isSelected()){
 						dayButton[j].setSelected(false);
@@ -269,32 +296,26 @@ public class VJournalDay extends JournalDay
 						dayButton[j].setIconTextGap(i);
 					}
 				}
-			
 			}
 		}
-		if(e.getActionCommand().equals(bSave.getText())){
+		if(e.getActionCommand().equals(saveButton.getText())){
 			saveData();
 		}
 	} 	//  actionPerformed
 	@Override
 	public void dispose() {
-		
 	}
 	@Override
 	public void mouseClicked(MouseEvent e) {
-
 	}
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		
 	}
 	@Override
 	public void mouseEntered(MouseEvent e) { 
-		
 	}
 	@Override
 	public void mouseExited(MouseEvent e) {   
-	
 	}	
 	@Override
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
@@ -310,67 +331,23 @@ public class VJournalDay extends JournalDay
 				JOptionPane.showMessageDialog(null, "Generate Day");
 			}
 			else{
-				dayButton = new JToggleButton[dayYear.size()];
-				for(int x = 1; x<13; x++){
-					JPanel 	dayTitlePanel  = new JPanel();
-			       	JLabel  monthLabel	   = new JLabel();
-			    	JPanel 	monthYearPanel = new JPanel();
-			    	monday		   = new JButton("L ");
-			    	monday.addActionListener(this);
-			    	tuesday		   = new JButton("M ");
-			    	tuesday.addActionListener(this);
-			    	wednesday	   = new JButton("M ");
-					wednesday.addActionListener(this);
-			    	thursday	   = new JButton("J ");
-					thursday.addActionListener(this);
-			    	friday		   = new JButton("V ");
-					friday.addActionListener(this);
-			    	saturday	   = new JButton("S ");
-					saturday.addActionListener(this);
-			    	sunday		   = new JButton("D ");
-					sunday.addActionListener(this);
-					cal.set(m_Year, x-1, 1);
-					month = cal.getTime();
-			
-			    	monthLabel.setText(formatter.format(month));
-					monthYearPanel.add(monthLabel);
-					
-					dayTitlePanel.setPreferredSize(new Dimension(200,20));
-					dayTitlePanel.add(monthYearPanel);
-					dayTitlePanel.setLayout(new GridLayout(0, 7));
-					dayTitlePanel.add(monday);
-					dayTitlePanel.add(tuesday);
-					dayTitlePanel.add(wednesday);
-					dayTitlePanel.add(thursday);
-					dayTitlePanel.add(friday);
-					dayTitlePanel.add(saturday);
-					dayTitlePanel.add(sunday);
-			        if(cols==4){ 
-			        	row=x; cols=0;     
-			        }
-	        	   centerPanel.add(monthYearPanel,  new GridBagConstraints(cols, row, 1, 1, 0.0, 0.0
-	        			   		,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-				   centerPanel.add(dayTitlePanel,  new GridBagConstraints(cols, row+1, 1, 1, 0.0, 0.0
-							,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-
-					dayMonth(m_Year,x);
-				     
-			    cols++;	
-				}
-				 centerPanel.revalidate();
+				generateDay();
 			}
+			centerPanel.revalidate();
 		}
-		
+		if(evt.getSource().equals(calendarSearch)){
+			clearData();
+			if(m_C_Year_ID!=0){
+				generateDay();
+			}
+			centerPanel.revalidate();
+		}
 	}
-	public void loadDay(){
-		
-	}
-	
 	public void clearData(){
-		startDay	   = 0;
-		count	   = 0;
-		cols=0;
-		row=0;
+		startDay = 0;
+		count	 = 0;
+		cols	 = 0;
+		rows		 = 0;
 		centerPanel.removeAll();
 		centerPanel.repaint();
 	}
@@ -383,7 +360,6 @@ public class VJournalDay extends JournalDay
 		String msg = saveCalendar(m_HR_Calendar_ID, journalButton, dayButton, trxName);
 		trx.commit();
 		ADialog.info(m_WindowNo, mainPanel, null, msg);
-		centerPanel.removeAll();
 		rightPanel.repaint();
 		clearData();
 	}
@@ -457,5 +433,4 @@ public class VJournalDay extends JournalDay
 	public boolean isLeapYear(int year) {
 	      return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
 	}
-		
 }

@@ -24,21 +24,13 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
-import org.compiere.model.MOrgInfo;
-import org.compiere.swing.CComboBox;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
-import org.compiere.util.Msg;
-import org.spin.model.MHRDay;
-import org.spin.model.MHRJournal;
 import org.spin.model.MHRJournalDay;
-import org.spin.model.MHRJournalLine;
 
 /**
  * 
@@ -47,17 +39,19 @@ import org.spin.model.MHRJournalLine;
  */
 public class JournalDay 
 {
-
 	/**	Window No			*/
 	public int         		m_WindowNo = 0;
-
+	/**	Calendar			*/
 	protected int 			m_HR_Calendar_ID 		= 0;
+	/**	IncidenceGroup		*/
 	protected int			m_HR_IncidenceGroup_ID  = 0;
+	/**	Year ID				*/
 	protected int 			m_C_Year_ID				= 0;
 	/**	Client				*/
 	protected int 			m_AD_Client_ID 			= 0;
 	/**	Organization		*/
 	protected int 			m_AD_Org_ID 			= 0;
+	/**	Year				*/
 	protected int			m_Year					= 0;
 	/** Red Color			*/
 	protected int 			m_RColor				= 0;
@@ -65,44 +59,42 @@ public class JournalDay
 	protected int 			m_GColor				= 0;
 	/** Blue Color			*/
 	protected int 			m_BColor				= 0;
-
-
-	protected ArrayList<Integer> 			m_HR_Concept_ID			= new ArrayList<Integer>();
-
-	protected ArrayList<Timestamp> 			m_StartHour			= new ArrayList<Timestamp>();
-	protected ArrayList<Timestamp> 			m_EndHour			= new ArrayList<Timestamp>();
+	/** Concept						*/
+	protected ArrayList<Integer> 	m_HR_Concept_ID		= new ArrayList<Integer>();
+	/** StartHour					*/
+	protected ArrayList<Timestamp> 	m_StartHour			= new ArrayList<Timestamp>();
+	/** EndHour						*/
+	protected ArrayList<Timestamp> 	m_EndHour			= new ArrayList<Timestamp>();
 	/**	Logger			*/
 	public static CLogger log = CLogger.getCLogger(JournalDay.class);
-	/**	Export Class for Bank Account	*/
-	public String			m_PaymentExportClassHR = null;
 	
-	protected ArrayList<KeyNamePair> getJournalLineData(int p_HR_Journal_ID, int p_HR_Concept_ID, String trxName){
-		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
-		StringBuffer sql =new StringBuffer("SELECT jl.AD_Org_ID, jl.HR_JournalLine_ID, jl.description FROM " +
-				"HR_JournalLine as jl " +
-				"INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID) " +
-				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
-				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" and jl.HR_Concept_ID="+p_HR_Concept_ID);
+	/** getDayYear
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 16/10/2014, 10:22:28
+	 * @param p_HR_Year_ID
+	 * @param trxName
+	 * @return
+	 * @return Vector<Integer>
+	 */
+	protected Vector<Integer> getDayYear(int p_HR_Year_ID, String trxName){
+		Vector<Integer> columnNames = new Vector<Integer>();
 		try	{
-			
-			PreparedStatement pstmt = DB.prepareStatement(sql.toString(), null);
-			
+			PreparedStatement pstmt = DB.prepareStatement("SELECT fiscalYear, HR_Day_ID  FROM HR_Day as d " +
+														  "INNER JOIN C_Year as y on(d.C_Year_ID=y.C_Year_ID) WHERE y.C_Year_ID=?", null);
+			pstmt.setInt(1, p_HR_Year_ID);
 			ResultSet rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				m_AD_Org_ID=rs.getInt("AD_Org_ID");
-				
-				data.add(new KeyNamePair(rs.getInt("HR_JournalLine_ID"), rs.getString("description")));
+
+			while (rs.next()) {
+				columnNames.add(rs.getInt(2));
+				m_Year=rs.getInt(1);
 			}
-			rs.close();
-			pstmt.close();
-		}	
-		catch (SQLException e){
-			log.log(Level.SEVERE, sql.toString(), e);
+			DB.close(rs, pstmt);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-			
-		return data;
+		return columnNames;
 	}
+
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 09/10/2014, 16:58:12
@@ -116,40 +108,29 @@ public class JournalDay
 				"HR_Journal";
 		return getData(sql, trxName);
 	}
-	
-	protected Vector<Integer> getDayYear(int p_HR_Year_ID, String trxName){
-		Vector<Integer> columnNames = new Vector<Integer>();
-		
-		
-		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT fiscalYear, HR_Day_ID  FROM HR_Day, C_Year " +
-														  "WHERE HR_Day.C_Year_ID=? and C_Year.C_Year_ID=HR_Day.C_Year_ID", null);
-			pstmt.setInt(1, p_HR_Year_ID);
-			ResultSet rs = pstmt.executeQuery();
-			//
-			while (rs.next()) {
-				columnNames.add(rs.getInt(2));
-				m_Year=rs.getInt(1);
-			}
-			DB.close(rs, pstmt);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	
-		return columnNames;
-	}
-	protected boolean getDayColor(int p_HR_day_ID, String trxName){
+	/** getDayColor
+	 * 
+	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 16/10/2014, 10:21:41
+	 * @param p_HR_day_ID
+	 * @param p_HR_Calendar_ID
+	 * @param p_C_Year_ID
+	 * @param trxName
+	 * @return
+	 * @return boolean
+	 */
+	protected boolean getDayColor(int p_HR_day_ID, int p_HR_Calendar_ID, int p_C_Year_ID, String trxName){
 		boolean result=false;
 		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT  jd.HR_Day_ID, red, green, blue  FROM HR_JournalDay as jd "+
-					"INNER JOIN HR_Calendar as c on(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
-					"INNER JOIN HR_Journal as j on(j.HR_Journal_ID=jd.HR_Journal_ID) " +
-					"INNER JOIN HR_Day as d on(d.HR_Day_ID=jd.HR_Day_ID) Where jd.HR_Day_ID=?", null);
+			PreparedStatement pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, red, green, blue  FROM HR_JournalDay as jd " +
+							"INNER JOIN HR_Calendar as c on(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
+							"INNER JOIN HR_Journal as j on(j.HR_Journal_ID=jd.HR_Journal_ID) " +
+							"INNER JOIN HR_Day as d on(d.HR_Day_ID=jd.HR_Day_ID) " +
+							"INNER JOIN C_Year as y on(d.C_Year_ID=y.C_Year_ID) " +
+							"WHERE jd.HR_Day_ID=? and c.HR_Calendar_ID=? and y.C_Year_ID=?", null);
 			pstmt.setInt(1, p_HR_day_ID);
+			pstmt.setInt(2, p_HR_Calendar_ID);
+			pstmt.setInt(3, p_C_Year_ID);
 			ResultSet rs = pstmt.executeQuery();
-			//
-			
-			
 			while (rs.next()) {
 				m_RColor = rs.getInt(2);
 				m_GColor = rs.getInt(3);
@@ -161,7 +142,6 @@ public class JournalDay
 			e.printStackTrace();
 		}
 		return result;
-	
 	}
 	
 	/**
@@ -176,7 +156,6 @@ public class JournalDay
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
 		
 		log.config("getData");
-		
 		try	{
 			PreparedStatement pstmt = DB.prepareStatement(sql, trxName);
 			ResultSet rs = pstmt.executeQuery();
@@ -192,18 +171,7 @@ public class JournalDay
 		}
 		return data;
 	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:43
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return void
-	 */
-	protected void setRGB(int p_HR_Journal_ID, String trxName){
-		m_RColor = getRColor(p_HR_Journal_ID,trxName);
-		m_GColor = getGColor(p_HR_Journal_ID,trxName);
-		m_BColor = getBColor(p_HR_Journal_ID,trxName);	
-	}
+	
 	/**
 	 * 
 	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:37
@@ -212,63 +180,38 @@ public class JournalDay
 	 * @return
 	 * @return int
 	 */
-	protected int getRColor(int p_HR_Journal_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT red, HR_Journal_ID " +
+	protected void getColor(int p_HR_Journal_ID, String trxName){
+		try	{
+			PreparedStatement pstmt = DB.prepareStatement("SELECT red, green, blue HR_Journal_ID " +
 				"FROM HR_Journal " +
-				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:32
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return
-	 * @return int
-	 */
-	protected int getGColor(int p_HR_Journal_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT green, HR_Journal_ID " +
-				"FROM HR_Journal " +
-				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
-	}
-	/**
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:25
-	 * @param p_HR_Concept_ID
-	 * @param trxName
-	 * @return
-	 * @return int
-	 */
-	protected int getBColor(int p_HR_Journal_ID, String trxName){
-		return DB.getSQLValue(trxName, "SELECT blue, HR_Journal_ID " +
-				"FROM HR_Journal " +
-				"WHERE HR_Journal_ID=?", p_HR_Journal_ID);
+				"WHERE HR_Journal_ID=?", null);
+		
+		pstmt.setInt(1, p_HR_Journal_ID);
+		ResultSet rs = pstmt.executeQuery();
+		while (rs.next()) {
+			m_RColor = rs.getInt(1);
+			m_GColor = rs.getInt(2);
+			m_BColor = rs.getInt(3);	
+		}
+		DB.close(rs, pstmt);
+		} catch (SQLException e) {
+		e.printStackTrace();
+		}
 	}
 	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, String trxName){
-		 
-		 //	Org Info
-		 MOrgInfo orgInfo = null;
-		 orgInfo = MOrgInfo.get(Env.getCtx(), m_AD_Org_ID, trxName);
-			
-		
+	
 		for(int j = 0; j < p_journalButton.length; j++){
-			
 			for(int i = 0; i < p_dayButton.length; i++){ 
 				if(p_dayButton[i].getIconTextGap()==j){
-
-					 MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
-
-					 journalDay.setAD_Org_ID(m_AD_Org_ID);
+					MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
+					journalDay.setAD_Org_ID(m_AD_Org_ID);
 					journalDay.setHR_Calendar_ID(p_HR_Calendar_ID);
 					journalDay.setHR_Day_ID(Integer.parseInt(p_dayButton[i].getName()));
 					journalDay.setHR_Journal_ID(Integer.parseInt(p_journalButton[j].getName()));
 					journalDay.saveEx();
 				}
-					
-			 
 			}
 		}
-			
 		 return "Save";
 	}
-	
 }
