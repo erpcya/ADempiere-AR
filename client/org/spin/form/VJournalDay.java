@@ -169,7 +169,6 @@ public class VJournalDay extends JournalDay
 		southPanel.add(saveButton);
 	}
 	public void dyInit() throws Exception{
-		
 		//	GET Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
 		int i=0;
@@ -193,7 +192,6 @@ public class VJournalDay extends JournalDay
 		for(KeyNamePair pp : dataIG) {
 			colorLabel = new JLabel();
 			colorLabel.setPreferredSize(new Dimension(20,18));
-			
 			journalButton[i] = new JButton();
 			journalButton[i].setText(pp.toString());
 			journalButton[i].setName(pp.getID().toString());

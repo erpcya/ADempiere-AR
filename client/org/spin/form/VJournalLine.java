@@ -35,7 +35,6 @@ import java.beans.VetoableChangeListener;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -89,74 +88,73 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		}
 	}
 	/**	Window No			*/
-	private int         m_WindowNo = 0;
+	private int         	m_WindowNo 		 = 0;
 	/**	FormFrame			*/
-		private FormFrame 	m_frame;
-	private BorderLayout 	mainLayout = new BorderLayout();
+	private FormFrame 		m_frame;
+	private BorderLayout 	mainLayout 		 = new BorderLayout();
 	/** Arrays for Line Journal */
-	private JCheckBox[] conceptBox;
-	private JButton[] 	h_IncidenceButton;
+	private JCheckBox[] 	conceptBox;
+	private JButton[] 		h_IncidenceButton;
 	/** Add Incidence Button    */
-	private JButton[] 	a_IncidenceButton;
-	private JPanel[] 	sliderPanel;
-	private JPanel[] 	hPanel;
+	private JButton[] 		a_IncidenceButton;
+	private JPanel[] 		sliderPanel;
+	private JPanel[] 		hPanel;
 	/** 						*/
-	private CPanel 		mainPanel    	 = new CPanel();
-	private CPanel 		northPanel   	 = new CPanel();
-	private CPanel		rightPanel	 	 = new CPanel();
-	private CPanel		leftPanel	 	 = new CPanel();
-	private JPanel 		southPanel	  	 = new JPanel();
-	private CPanel		hoursPanel    	 = new CPanel();
-	private JSplitPane	detailPanel  	 = new JSplitPane();
-	private String		trxName 		 = Trx.createTrxName("GM");
-	private Trx			trx 			 = null;
+	private CPanel 			mainPanel    	 = new CPanel();
+	private CPanel 			northPanel   	 = new CPanel();
+	private CPanel			rightPanel	 	 = new CPanel();
+	private CPanel			leftPanel	 	 = new CPanel();
+	private JPanel 			southPanel	  	 = new JPanel();
+	private CPanel			hoursPanel    	 = new CPanel();
+	private JSplitPane		detailPanel  	 = new JSplitPane();
+	private String			trxName 		 = Trx.createTrxName("GM");
+	private Trx				trx 			 = null;
 	/** Journal 				*/
-	private JLabel 		journalLabel     = new JLabel();
-	private VLookup 	journalSearch    = null;
+	private JLabel 			journalLabel     = new JLabel();
+	private VLookup 		journalSearch    = null;
 	/** Hours Slot 				*/
-	private JLabel		s_SlotLabel	     = new JLabel();
-	private JLabel		e_SlotLabel	     = new JLabel();
-	private JTextField	s_SlotButton 	 = new JTextField(5);
-	private JTextField	e_SlotButton 	 = new JTextField(5);
+	private JLabel			s_SlotLabel	     = new JLabel();
+	private JLabel			e_SlotLabel	     = new JLabel();
+	private JTextField		s_SlotButton 	 = new JTextField(5);
+	private JTextField		e_SlotButton 	 = new JTextField(5);
 	/**	Group Incidence			*/
-	private JLabel 		groupLabel  	 = new JLabel();
-	private JScrollPane scrollPane;
+	private JLabel 			groupLabel  	 = new JLabel();
+	private JScrollPane 	scrollPane;
 	/** Save */
-	private JButton		bSave 			 = new JButton();
-	private JDialog 	hour_Dialog;
+	private JButton			bSave 			 = new JButton();
+	private JDialog 		hour_Dialog;
 	/** Label Title 			*/
-	private JLabel title_Label = new JLabel();
+	private JLabel 			title_Label 	 = new JLabel();
 	/**  Start Slot Hour 		*/    
-    private JLabel 		s_HourLabel 	 = new JLabel();
-	private CComboBox 	s_HourList 		 = new CComboBox();
+    private JLabel 			s_HourLabel 	 = new JLabel();
+	private CComboBox 		s_HourList 		 = new CComboBox();
 	/**  Start Slot Min 		*/
-	private JLabel 		s_MinLabel 	  	 = new JLabel();
-	private CComboBox 	s_MinList 		 = new CComboBox();
+	private JLabel 			s_MinLabel 	  	 = new JLabel();
+	private CComboBox 		s_MinList 		 = new CComboBox();
 	/**  End Slot Hour 			*/
-	private JLabel 		e_HourLabel		 = new JLabel();
-	private CComboBox 	e_HourList 		 = new CComboBox();
+	private JLabel 			e_HourLabel		 = new JLabel();
+	private CComboBox 		e_HourList 		 = new CComboBox();
 	/**  End Slot Min 			*/
-	private JLabel 		e_MinLabel		 = new JLabel();
-	private CComboBox 	e_MinList 		 = new CComboBox();
+	private JLabel 			e_MinLabel		 = new JLabel();
+	private CComboBox 		e_MinList 		 = new CComboBox();
 	/**  Save Slot Button 		*/
-    private JButton 	s_HourButton	 = new JButton();
-	private JButton 	c_HourButton	 = new JButton();
+    private JButton 		s_HourButton	 = new JButton();
+	private JButton 		c_HourButton	 = new JButton();
 	/**  Save Slot Button 		*/
-	private int 		s_IncideceButton = 0;
-	private int 		aux 			 = 0;
+	private int 			s_IncideceButton = 0;
+	private int 			aux 			 = 0;
 	/**  Total Button 		*/
-	private int 		t_Button  		 = 0;
+	private int 			t_Button  		 = 0;
 	/** Incidence */
-	static final int 	N_HOUR 			 = 24;
-	static final int 	N_MIN  			 = 60;
-	private int 		s_Hour      	 = 120;
-	private int 		start_Hour  	 = 1;
-	private int 		start_Min  		 = 1;
-	private int 		end_Hour 		 = 1;
-	private int 		end_Min 		 = 1;
-	private float 		fstart_Hour		 = 0;
-	private float 		fend_Hour		 = 0;
-	private Calendar cal2 = Calendar.getInstance();
+	static final int 		N_HOUR 			 = 24;
+	static final int 		N_MIN  			 = 60;
+	private int 			s_Hour      	 = 120;
+	private int 			start_Hour  	 = 1;
+	private int 			start_Min  		 = 1;
+	private int 			end_Hour 		 = 1;
+	private int 			end_Min 		 = 1;
+	private float 			fstart_Hour		 = 0;
+	private float 			fend_Hour		 = 0;
 
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
@@ -256,7 +254,6 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		int AD_Column_ID = 1000177;		//	HR_Journal.HR_Journal_ID
 		GridLayout experimentLayout = new GridLayout(0,24,0,0);
 		MLookup lookupJournal = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
-		
 		journalSearch = new VLookup("HR_Journal_ID", true, false, true, lookupJournal);
 		journalSearch.addVetoableChangeListener(this);
 		hoursPanel.setBackground(Color.BLUE);
@@ -274,8 +271,8 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 			if(i < 10)
 				hoursLabel.setText("0"+i+":30");
 			else 
-				hoursLabel.setText(i+":30");
 			//	Hours Label Line
+			hoursLabel.setText(i+":30");
 			hoursLabel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.black));
 			hoursLabel.setForeground(Color.WHITE);
 			hoursLabel.setFont(new Font("SanSerif", Font.PLAIN, 14));
@@ -304,14 +301,14 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		
 		ArrayList<KeyNamePair> dataIG = getGroupIncidenceData(p_HR_Journal_ID,trxName);
 		
-		conceptBox = new JCheckBox[dataIG.size()];
-		h_IncidenceButton = new JButton[30];
+		conceptBox 		  = new JCheckBox[dataIG.size()];
+		h_IncidenceButton = new JButton[getLineCount(trxName)];
 		a_IncidenceButton = new JButton[dataIG.size()];
-		sliderPanel = new JPanel[30];
-
-		hPanel = new JPanel[dataIG.size()];
-		for (int j = 0; j < 30; j++){
-			  h_IncidenceButton[j]  = new JButton();
+		sliderPanel 	  = new JPanel[dataIG.size()];
+		hPanel 			  = new JPanel[dataIG.size()];
+		
+		for(int j = 0; j < h_IncidenceButton.length; j++){
+			h_IncidenceButton[j] = new JButton();
 		}
 		for(KeyNamePair pp : dataIG) {
 			sliderPanel[i] = new JPanel();	
@@ -323,13 +320,13 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		    
 		    conceptBox[i].setFont(new Font("SanSerif", Font.PLAIN, 14));
 			conceptBox[i].addActionListener(this);
-		    conceptBox[i].setName("--"+i);
+		    conceptBox[i].setName(String.valueOf(i));
 		    conceptBox[i].setMinimumSize(new Dimension(130, 15));
 		    
 		    a_IncidenceButton[i].setMinimumSize(new Dimension(10,10));
 		    a_IncidenceButton[i].setMaximumSize(new Dimension(11,11));
 		    a_IncidenceButton[i].setText("+");
-		    a_IncidenceButton[i].setName("--"+i);
+		    a_IncidenceButton[i].setName(String.valueOf(i));
 		    a_IncidenceButton[i].addActionListener(this);
 
 		    sliderPanel[i].setLayout(null);
@@ -337,7 +334,6 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 				  
   		    //	Add Slider Hours rightPanel
 	    	rightPanel.add(sliderPanel[i]);
-	    	
 			//	Add Label Cocept rightPanel
 			hPanel[i].setLayout(new BorderLayout()); 
 			hPanel[i].setMaximumSize(new Dimension(250, 15));
@@ -363,25 +359,25 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>29/09/2014, 09:21:46
 	 *	Add Button Hour
 	 */	
-	public void addButtonHour(int i, int j) {
+	public void addButtonHour(int iSlider, int iButton) {
+		h_IncidenceButton[iButton]  = new JButton();
 		//	Set HR_Concept_ID for Get RGBColor
-		getColor(m_HR_Concept_ID.get(i),trxName);
-    
-		h_IncidenceButton[j].setName(String.valueOf(j));
-		h_IncidenceButton[j].setIconTextGap(i);
-		h_IncidenceButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
-		h_IncidenceButton[j].setForeground(new Color(m_RColor, m_GColor, m_BColor));
+		getColor(m_HR_Concept_ID.get(iSlider),trxName);
+		h_IncidenceButton[iButton].setName(String.valueOf(iButton));
+		h_IncidenceButton[iButton].setIconTextGap(iSlider);
+		h_IncidenceButton[iButton].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+		h_IncidenceButton[iButton].setForeground(new Color(m_RColor, m_GColor, m_BColor));
 		Border thickBorder = new LineBorder(new Color(m_RColor, m_GColor, m_BColor), 0);
-		h_IncidenceButton[j].setBorder(thickBorder);
-		h_IncidenceButton[j].setSize(new Dimension(((end_Hour+ (int) fend_Hour)-(start_Hour+(int) fstart_Hour)),11));
-		h_IncidenceButton[j].setLocation(start_Hour+(int) fstart_Hour, 0);
-		h_IncidenceButton[j].addActionListener(this);
-		h_IncidenceButton[j].addMouseListener(this);
-		h_IncidenceButton[j].setText(String.valueOf(j));
-		sliderPanel[i].add(h_IncidenceButton[j]);
-		sliderPanel[i].repaint();
+		h_IncidenceButton[iButton].setBorder(thickBorder);
+		h_IncidenceButton[iButton].setSize(new Dimension(((end_Hour+ (int) fend_Hour)-(start_Hour+(int) fstart_Hour)),11));
+		h_IncidenceButton[iButton].setLocation(start_Hour+(int) fstart_Hour, 0);
+		h_IncidenceButton[iButton].addActionListener(this);
+		h_IncidenceButton[iButton].addMouseListener(this);
+		h_IncidenceButton[iButton].setText(String.valueOf(iButton));
+		sliderPanel[iSlider].add(h_IncidenceButton[iButton]);
+		sliderPanel[iSlider].repaint();
 		t_Button++;
-	} //	addPanelHour
+	} //	addButtonHour
 
 	  @Override
 	public void mousePressed(MouseEvent e) {
@@ -400,7 +396,6 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 			end_Min    = (Integer) e_MinList.getSelectedItem() * s_Hour / N_MIN;
 			s_IncideceButton = (end_Hour+end_Min)-(start_Hour+start_Min);
 			h_IncidenceButton[aux].setLocation(start_Hour+start_Min, 0);
-		    
 			Timer timer = new Timer(10, new ActionListener() {
 				   int  n=0;
 				   public void actionPerformed(ActionEvent e) {
@@ -416,7 +411,7 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 			JOptionPane.showMessageDialog(null, "Invalid Hour");
 		}
 	}
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e){
 		int count=conceptBox.length;
 		int j=0; 
 		if(e.getActionCommand().equals(c_HourButton.getText())){

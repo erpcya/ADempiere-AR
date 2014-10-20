@@ -63,8 +63,9 @@ public class JournalLine {
 	public static CLogger log = CLogger.getCLogger(JournalDay.class);
 	/**	Export Class for Bank Account	*/
 	public String			m_PaymentExportClassHR = null;
-	
+	protected int 			m_count				= 0;
 	protected ArrayList<KeyNamePair> getJournalLineData(int p_HR_Journal_ID, int p_HR_Concept_ID, String trxName){
+		
 		ArrayList<KeyNamePair> data = new ArrayList<KeyNamePair>();
 		StringBuffer sql =new StringBuffer("SELECT jl.AD_Org_ID, jl.HR_JournalLine_ID, jl.description FROM " +
 				"HR_JournalLine as jl " +
@@ -94,6 +95,10 @@ public class JournalLine {
 				"INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID) " +
 				"WHERE jl.HR_Journal_ID="+p_HR_Journal_ID+" GROUP BY c.HR_Concept_ID";
 		return getData(sql, trxName);
+	}
+	protected int getLineCount(String trxName){
+		MHRJournal journal = new MHRJournal(Env.getCtx(), 0, trxName);
+		return journal.get_ColumnCount();
 	}
 	/**
 	 * 
@@ -129,6 +134,7 @@ public class JournalLine {
 	 */
 	protected void setTimeSlot(int p_HR_Journal, String trxName){
 		MHRJournal journal = new MHRJournal(Env.getCtx(), 0, trxName);
+		
 		if(m_HR_Journal_ID != 0)
 			journal.setHR_Journal_ID(m_HR_Journal_ID);
 		if(m_HR_Journal_ID != 0){
