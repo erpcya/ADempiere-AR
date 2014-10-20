@@ -108,9 +108,10 @@ public class JournalDay
 				"HR_Journal";
 		return getData(sql, trxName);
 	}
-	/** getDayColor
-	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 16/10/2014, 10:21:41
+	
+	/** 
+	 * Get Color for Day
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 16/10/2014, 10:21:41
 	 * @param p_HR_day_ID
 	 * @param p_HR_Calendar_ID
 	 * @param p_C_Year_ID
@@ -121,12 +122,13 @@ public class JournalDay
 	protected boolean getDayColor(int p_HR_day_ID, int p_HR_Calendar_ID, int p_C_Year_ID, String trxName){
 		boolean result=false;
 		try	{
-			PreparedStatement pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, red, green, blue  FROM HR_JournalDay as jd " +
-							"INNER JOIN HR_Calendar as c on(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
-							"INNER JOIN HR_Journal as j on(j.HR_Journal_ID=jd.HR_Journal_ID) " +
-							"INNER JOIN HR_Day as d on(d.HR_Day_ID=jd.HR_Day_ID) " +
-							"INNER JOIN C_Year as y on(d.C_Year_ID=y.C_Year_ID) " +
-							"WHERE jd.HR_Day_ID=? and c.HR_Calendar_ID=? and y.C_Year_ID=?", null);
+			PreparedStatement pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.red, j.green, j.blue  " +
+							"FROM HR_JournalDay AS jd " +
+							"INNER JOIN HR_Calendar AS c ON(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
+							"INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID=jd.HR_Journal_ID) " +
+							"INNER JOIN HR_Day AS d ON(d.HR_Day_ID=jd.HR_Day_ID) " +
+							"INNER JOIN C_Year AS y ON(d.C_Year_ID=y.C_Year_ID) " +
+							"WHERE jd.HR_Day_ID=? AND c.HR_Calendar_ID=? AND y.C_Year_ID=?", null);
 			pstmt.setInt(1, p_HR_day_ID);
 			pstmt.setInt(2, p_HR_Calendar_ID);
 			pstmt.setInt(3, p_C_Year_ID);
@@ -174,7 +176,7 @@ public class JournalDay
 	
 	/**
 	 * 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:37
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:37
 	 * @param p_HR_Journal_ID
 	 * @param trxName
 	 * @return
@@ -184,7 +186,7 @@ public class JournalDay
 		try	{
 			PreparedStatement pstmt = DB.prepareStatement("SELECT red, green, blue HR_Journal_ID " +
 				"FROM HR_Journal " +
-				"WHERE HR_Journal_ID=?", null);
+				"WHERE HR_Journal_ID=?", trxName);
 		
 		pstmt.setInt(1, p_HR_Journal_ID);
 		ResultSet rs = pstmt.executeQuery();
@@ -198,6 +200,17 @@ public class JournalDay
 		e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 20/10/2014, 17:24:37
+	 * @param p_HR_Calendar_ID
+	 * @param p_journalButton
+	 * @param p_dayButton
+	 * @param trxName
+	 * @return
+	 * @return String
+	 */
 	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, String trxName){
 	
 		for(int j = 0; j < p_journalButton.length; j++){

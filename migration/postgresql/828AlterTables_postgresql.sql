@@ -1,0 +1,10 @@
+-- Oct 20, 2014 11:24:05 AM VET
+-- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
+UPDATE AD_Table SET AD_Window_ID=1000010,Updated=TO_TIMESTAMP('2014-10-20 11:24:05','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Table_ID=1000014
+;
+
+-- Oct 20, 2014 11:25:19 AM VET
+-- I forgot to set the DICTIONARY_ID_COMMENTS System Configurator
+UPDATE AD_Table SET AD_Window_ID=1000012,Updated=TO_TIMESTAMP('2014-10-20 11:25:19','YYYY-MM-DD HH24:MI:SS'),UpdatedBy=100 WHERE AD_Table_ID=1000013
+;
+
