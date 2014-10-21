@@ -31,7 +31,7 @@ public class X_HR_JournalLine extends PO implements I_HR_JournalLine, I_Persiste
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20141014L;
+	private static final long serialVersionUID = 20141021L;
 
     /** Standard Constructor */
     public X_HR_JournalLine (Properties ctx, int HR_JournalLine_ID, String trxName)
@@ -143,9 +143,9 @@ public class X_HR_JournalLine extends PO implements I_HR_JournalLine, I_Persiste
 	public void setHR_Journal_ID (int HR_Journal_ID)
 	{
 		if (HR_Journal_ID < 1) 
-			set_Value (COLUMNNAME_HR_Journal_ID, null);
+			set_ValueNoCheck (COLUMNNAME_HR_Journal_ID, null);
 		else 
-			set_Value (COLUMNNAME_HR_Journal_ID, Integer.valueOf(HR_Journal_ID));
+			set_ValueNoCheck (COLUMNNAME_HR_Journal_ID, Integer.valueOf(HR_Journal_ID));
 	}
 
 	/** Get Journal.

@@ -34,7 +34,6 @@ import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -67,11 +66,13 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.Msg;
 import org.compiere.util.Trx;
+
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>
  *
  */
-public class VJournalLine extends JournalLine implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener  {
+public class VJournalLine extends JournalLine 
+			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener  {
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
 		m_WindowNo = WindowNo;
@@ -290,8 +291,6 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 	 * @return void
 	 */
 	public void addItems(int p_HR_Journal_ID) {
-		int i=0;
-		int cont=0;
 		rightPanel.removeAll();
 		leftPanel.removeAll();
 		clearData();
@@ -299,25 +298,25 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 		leftPanel.add(groupLabel);
 		rightPanel.add(hoursPanel);
 		
-		ArrayList<KeyNamePair> dataIG = getGroupIncidenceData(p_HR_Journal_ID,trxName);
+		KeyNamePair[] dataIG = getGroupIncidenceData(p_HR_Journal_ID,trxName);
 		
-		conceptBox 		  = new JCheckBox[dataIG.size()];
+		conceptBox 		  = new JCheckBox[dataIG.length];
 		h_IncidenceButton = new JButton[getLineCount(trxName)];
-		a_IncidenceButton = new JButton[dataIG.size()];
-		sliderPanel 	  = new JPanel[dataIG.size()];
-		hPanel 			  = new JPanel[dataIG.size()];
-		
+		a_IncidenceButton = new JButton[dataIG.length];
+		sliderPanel 	  = new JPanel[dataIG.length];
+		hPanel 			  = new JPanel[dataIG.length];	
 		for(int j = 0; j < h_IncidenceButton.length; j++){
 			h_IncidenceButton[j] = new JButton();
 		}
-		for(KeyNamePair pp : dataIG) {
+		for(int i = 0; i < dataIG.length; i++) {
 			sliderPanel[i] = new JPanel();	
-			conceptBox[i]  = new JCheckBox(pp.toString(), true);
-			m_HR_Concept_ID.add(i,Integer.parseInt(pp.getID()));
-			ArrayList<KeyNamePair> dataJL = getJournalLineData(p_HR_Journal_ID,m_HR_Concept_ID.get(i),trxName);
+			conceptBox[i]  = new JCheckBox(dataIG[i].getName(), true);
+
+	    	m_HR_Concept_ID.add(i,dataIG[i].getKey());
+			KeyNamePair[] dataJL = getJournalLineData(p_HR_Journal_ID,m_HR_Concept_ID.get(i),trxName);
 		    a_IncidenceButton[i]  = new JButton();
 		    hPanel[i] = new JPanel();
-		    
+
 		    conceptBox[i].setFont(new Font("SanSerif", Font.PLAIN, 14));
 			conceptBox[i].addActionListener(this);
 		    conceptBox[i].setName(String.valueOf(i));
@@ -341,16 +340,15 @@ public class VJournalLine extends JournalLine implements FormPanel, ChangeListen
 			hPanel[i].add(a_IncidenceButton[i], BorderLayout.LINE_END);
 		    leftPanel.add(hPanel[i]);
 		  
-		    for(KeyNamePair rr : dataJL) {
-	    		setSE_Hour(Integer.parseInt(rr.getID()),trxName);
-	    		start_Hour = (((int) m_StartHour.get(cont).getTime() /3600000)-4)*120 ;
-	    		end_Hour   =(((int) m_EndHour.get(cont).getTime() /3600000)-4)*120;
-	    		fstart_Hour   = (((((float) m_StartHour.get(cont).getTime() /3600000)-4)*120)-start_Hour);
-	    		fend_Hour   =   (((((float) m_EndHour.get(cont).getTime()   /3600000)-4)*120)-end_Hour);
-	    		addButtonHour(i,cont);
-	    		cont++;
+		    for(int j = 0; j < dataJL.length; j++) {
+	    		getSE_Hour(dataJL[j].getKey(),trxName);
+	    		start_Hour = (((int) m_StartHour.get(j).getTime() /3600000)-4)*120;
+	    		end_Hour   =(((int) m_EndHour.get(j).getTime() /3600000)-4)*120;
+	    		fstart_Hour   = (((((float) m_StartHour.get(j).getTime() /3600000)-4)*120)-start_Hour);
+	    		fend_Hour   =   (((((float) m_EndHour.get(j).getTime()   /3600000)-4)*120)-end_Hour);
+	    		addButtonHour(i,j);
 	    	}
-		    i++;
+		   
 		}
 		 leftPanel.repaint();
 		 rightPanel.repaint();
