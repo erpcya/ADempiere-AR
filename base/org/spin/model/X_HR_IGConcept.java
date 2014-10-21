@@ -30,7 +30,7 @@ public class X_HR_IGConcept extends PO implements I_HR_IGConcept, I_Persistent
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20141014L;
+	private static final long serialVersionUID = 20141021L;
 
     /** Standard Constructor */
     public X_HR_IGConcept (Properties ctx, int HR_IGConcept_ID, String trxName)

@@ -102,34 +102,38 @@ public class VJournalDay extends JournalDay
 	/** Calendar 				*/
 	private JLabel 			calendarLabel     = new JLabel();
 	private VLookup 		calendarSearch    = null;
-	/** Year 				*/
+	/** Year 					*/
 	private JLabel 			yearLabel		  = new JLabel();
 	private VLookup 		yearSearch	      = null;
 	/** Save */
 	private JButton			saveButton		  = new JButton();
-	/** Day Calendar */
+	/** Day Calendar 			*/
 	private JToggleButton[] dayButton;
-	private KeyNamePair[]    dayYear	  	  	  = null;
+	private KeyNamePair[]   dayYear	  	  	  = null;
 	private Calendar 		cal				  = Calendar.getInstance();
-	/**	First Day */
+	/**	First Day 				*/
 	private	int				startDay	 	  = 0;
-	/** Count Day */
+	/** Count Day 				*/
 	private	int				count	  	  	  = 0;
-	/** cols and rows calendar */
+	/** Columns calendar  		*/
 	private int 			cols			  = 0;
+	/** Rows calendar  			*/
 	private int 			rows			  = 0;
-	/** formatter Month 	*/
+	/** Formatter Month 		*/
 	private SimpleDateFormat mFormatter 	  = new SimpleDateFormat("MMMM");
-	/** formatter Day 		*/
+	/** Formatter Day 			*/
 	private SimpleDateFormat dFormatter 	  = new SimpleDateFormat("E");
-	/** Journal 			*/
+	/** Journal 				*/
 	private JButton[] 		journalButton	  = null;
-	private JLabel 			colorLabel 	  	  = new JLabel();
-	/**  Month */
+	/** Journal Color			*/
+	private JLabel[] 		colorLabel 	  	  = null;
+	/**  Month 					*/
 	private JLabel  	    monthLabel		  = null;
-	/** Day Week */
+	/** Day Week 				*/
 	private JLabel  	    dayLabel		  = null;
+	/** Get Date 				*/
 	private Date 		    getDate 		  = null;
+	/** Journal Label			*/
 	private JLabel		    journalLabel	  = new JLabel();
 	
 	private void jbInit() throws Exception
@@ -143,6 +147,7 @@ public class VJournalDay extends JournalDay
 		yearLabel.setText(Msg.translate(Env.getCtx(), "Year"));
 		saveButton.setText(Msg.translate(Env.getCtx(), "Save"));
 		saveButton.addActionListener(this);
+		
 		northPanel.add(calendarLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0)); 
 		northPanel.add(calendarSearch, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0
@@ -160,15 +165,19 @@ public class VJournalDay extends JournalDay
        								 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
        	rightPanel.setLayout(JournalLayout);
        	rightPanel.add(scrollPane);
+       	//	Add North Panel
        	mainPanel.add(northPanel, BorderLayout.NORTH);
+       	//	Add Center Panel
 		mainPanel.add(centerPanel, BorderLayout.CENTER);
+		//	Add Right Panel
 		mainPanel.add(rightPanel, BorderLayout.EAST);
+		// Add Button Save
 		southPanel.add(saveButton);
 	}
+	
 	public void dyInit() throws Exception{
 		//	GET Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
-		
 		MLookup lookupCalendar = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		calendarSearch = new VLookup("HR_Calendar_ID", true, false, true, lookupCalendar);
 		calendarSearch.addVetoableChangeListener(this);
@@ -185,28 +194,38 @@ public class VJournalDay extends JournalDay
 		//	Get Journal
 		KeyNamePair[] dataIG = getJournal(trxName);
 		journalButton = new JButton[dataIG.length];
-		
+		colorLabel = new JLabel[dataIG.length];
 		for(int i = 0; i < dataIG.length; i++) {
-			colorLabel = new JLabel();
-			colorLabel.setPreferredSize(new Dimension(20,18));
 			journalButton[i] = new JButton();
 			journalButton[i].setText(dataIG[i].getName());
 			journalButton[i].setName(String.valueOf(dataIG[i].getKey()));
 			journalButton[i].addActionListener(this);
+			journalButton[i].addMouseListener(this);
 			// Get Color
 			getColor(dataIG[i].getKey(),trxName);
-			colorLabel.setBackground(new Color(m_RColor, m_GColor, m_BColor));
-			colorLabel.setOpaque(true);
-			journalPanel.add(colorLabel);
+			colorLabel[i] = new JLabel();
+			colorLabel[i].setPreferredSize(new Dimension(20,18));
+			colorLabel[i].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+			colorLabel[i].setOpaque(true);
+			journalPanel.add(colorLabel[i]);
 			journalButton[i].setPreferredSize(new Dimension(170,20));
 			journalPanel.add(journalButton[i]);			
 		}
+		//	Add Journal
 		rightPanel.add(journalPanel);
 	}
-
+	
+	/**
+	 * Add Days of the Month From Calendar
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 16:54:22
+	 * @param year
+	 * @param month
+	 * @return void
+	 */
 	public void dayMonth(int year, int month) {
 		  startDay = getStartDay(year, month);
-	      int numberOfDaysInMonth = getNumberOfDaysInMonth(year, month);	 
+	      int numberOfDaysInMonth = getNumberOfDaysInMonth(year, month);
+	      
 	      dayNumPanel = new JPanel();
 	      dayNumPanel.setPreferredSize(new Dimension(200,120));
 	      dayNumPanel.setMaximumSize(new Dimension(200,121));
@@ -227,33 +246,42 @@ public class VJournalDay extends JournalDay
 	    	  dayButton[count].setName(String.valueOf(dayYear[count].getKey()));
 	    	  dayButton[count].setMaximumSize(new Dimension(10,20));
 	    	  dayButton[count].setPreferredSize(new Dimension(10,20));
+	    	  dayButton[count].setBorder(BorderFactory.createEtchedBorder());
 	    	  dayNumPanel.add(dayButton[count]);
 	    	  count++;
 	      }
 	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, rows+2, 1, 1, 0.0, 0.0
 					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-	} // Day Month
+	} //  Day Month
 	
+	/**
+	 * Generate Days of Calendar 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 14:02:10
+	 * @return void
+	 */
 	public void generateDay(){
 		 dayButton = new JToggleButton[dayYear.length];
 			for(int x = 1; x<13; x++){
 				dayTitlePanel  = new JPanel();
-		       	monthLabel	   = new JLabel();
+				dayTitlePanel.setPreferredSize(new Dimension(200,20));
+				monthLabel	   = new JLabel();
 		    	monthYearPanel = new JPanel();
-		    	
+		    	//	Set Date
 				cal.set(m_Year, x-1, 1);
 				getDate = cal.getTime();
-		    	monthLabel.setText(mFormatter.format(getDate));
+		    	//	Print Month Name
+				monthLabel.setText(mFormatter.format(getDate));
 				monthYearPanel.add(monthLabel);
 				
-				dayTitlePanel.setPreferredSize(new Dimension(200,20));
 				dayTitlePanel.add(monthYearPanel);
 				dayTitlePanel.setLayout(new GridLayout(0, 7));
 				for(int i = 0; i<7; i++){
 					dayLabel	= new JLabel(dFormatter.format(getDate));
+					//	Set Date
 					cal.set(2014, 8, i);
 					getDate 	= cal.getTime();
-			       	dayLabel.setText(" "+dFormatter.format(getDate));
+			       	//	Print Day Name 
+					dayLabel.setText(" "+dFormatter.format(getDate));
 			       	dayLabel.setMaximumSize(new Dimension(10,20));
 			       	dayLabel.setPreferredSize(new Dimension(10,20));
 			       	dayTitlePanel.add(dayLabel);
@@ -265,28 +293,32 @@ public class VJournalDay extends JournalDay
      			   		,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 			    centerPanel.add(dayTitlePanel,  new GridBagConstraints(cols, rows+1, 1, 1, 0.0, 0.0
 						,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-			   //	Print Day Month
+
+			    //	Add Day of the Month
 			   dayMonth(m_Year,x);
 			   cols++;	
 			}
 	} //  generateDay
-	  @Override
+	
+	@Override
 	public void mousePressed(MouseEvent e) {
 	}
+	  
 	@Override
 	public void stateChanged(ChangeEvent e) {
 	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e){
 		//	Asign journal in day button
 		for(int i = 0; i < journalButton.length; i++){ 
 			if(e.getActionCommand().equals(journalButton[i].getText())){
+				//	Get Color
 				getColor(Integer.parseInt(journalButton[i].getName()),trxName);
 				for(int j = 0; j < dayButton.length; j++){
 					if(dayButton[j].isSelected()){
 						dayButton[j].setSelected(false);
 						dayButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
-						dayButton[j].setIconTextGap(i);
 					}
 				}
 			}
@@ -304,16 +336,40 @@ public class VJournalDay extends JournalDay
 	@Override
 	public void mouseReleased(MouseEvent e) {
 	}
+	
 	@Override
-	public void mouseEntered(MouseEvent e) { 
+	public void mouseEntered(MouseEvent e) {
+			// Add Border from Day Button
+			for(int i = 0; i < journalButton.length; i++){
+				if(e.getSource().equals(journalButton[i])){
+					for(int j = 0; j < dayButton.length; j++){
+						if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
+							dayButton[j].setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+						}
+					}
+				}
+			}
 	}
+	
 	@Override
-	public void mouseExited(MouseEvent e) {   
-	}	
+	public void mouseExited(MouseEvent e) {
+		// Remove Border from Day Button
+		for(int i = 0; i < journalButton.length; i++){
+			if(e.getSource().equals(journalButton[i])){
+				for(int j = 0; j < dayButton.length; j++){
+					if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
+						dayButton[j].setBorder(BorderFactory.createEtchedBorder());
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 		Object value = evt.getNewValue();
 		if(evt.getSource().equals(calendarSearch)){
+			//	Get Value Calendar Search
 			m_HR_Calendar_ID=(Integer) calendarSearch.getValue();
 		}
 		if(evt.getSource().equals(yearSearch)){
@@ -333,11 +389,17 @@ public class VJournalDay extends JournalDay
 		if(evt.getSource().equals(calendarSearch)){
 			clearData();
 			if(m_C_Year_ID!=0){
+				//	Generate Day of Month
 				generateDay();
 			}
 			centerPanel.revalidate();
 		}
 	}
+	/**
+	 * Clear Data
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 14:06:16
+	 * @return void
+	 */
 	public void clearData(){
 		startDay = 0;
 		count	 = 0;
@@ -348,25 +410,25 @@ public class VJournalDay extends JournalDay
 	}
 	/**
 	 * Save Data
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 02/10/2014, 14:21:57
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 02/10/2014, 14:21:57
 	 * @return void
 	 */
 	public void saveData(){
-		String msg = saveCalendar(m_HR_Calendar_ID, journalButton, dayButton, trxName);
+		String msg = saveCalendar(m_HR_Calendar_ID, journalButton, dayButton, colorLabel, trxName);
 		trx.commit();
 		ADialog.info(m_WindowNo, mainPanel, null, msg);
 		rightPanel.repaint();
 		clearData();
 	}
 	   
-		/** Get the start day of the first day in a month
-		 * 
-		 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:34:57
-		 * @param year
-		 * @param month
-		 * @return
-		 * @return int
-  		*/
+	/** Get the start day of the first day in a month
+	 * 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:34:57
+	 * @param year
+	 * @param month
+	 * @return
+	 * @return int
+  	*/
 	public int getStartDay(int year, int month) {
 	      //Get total number of days since 1/1/1800
 	      int startDay1800 = 3;
@@ -375,9 +437,9 @@ public class VJournalDay extends JournalDay
 	      return (totalNumberOfDays + startDay1800) % 7;
     }
 		    
-	/** Get the total number of days since January 1, 1800 
-	 * 	 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:35:31
+	/** 
+	 * Get the total number of days since January 1, 1800 	 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:35:31
 	 * @param year
 	 * @param month
 	 * @return
@@ -397,9 +459,9 @@ public class VJournalDay extends JournalDay
 		      return total;
     }
 		 
-	/** Get the number of days in a month
-	 * 		 
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:36:20
+	/** 
+	 * 	Get the number of days in a month	 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:36:20
 	 * @param year
 	 * @param month
 	 * @return
@@ -418,9 +480,9 @@ public class VJournalDay extends JournalDay
 	      return 0; // If month is incorrect
 	}
 		 
-	 /** Determine if it is a leap year
-	  * 
-	  *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:37:13
+	 /** 
+	  * Determine if it is a leap year
+	  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:37:13
 	  * @param year
 	  * @return
 	  * @return boolean

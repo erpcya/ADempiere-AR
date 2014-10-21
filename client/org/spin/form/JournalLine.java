@@ -164,7 +164,7 @@ public class JournalLine {
 	 * @param trxName
 	 * @return void
 	 */
-	protected void setTimeSlot(int p_HR_Journal, String trxName){
+	protected void getTimeSlot(int p_HR_Journal, String trxName){
 			m_TimeSlotStart = getTimeSlotStart(p_HR_Journal,trxName);
 			m_TimeSlotEnd = getTimeSlotEnd(p_HR_Journal,trxName);
 	}	
