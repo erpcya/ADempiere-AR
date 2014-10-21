@@ -26,6 +26,11 @@ import java.util.Properties;
 public class MHRJournalDay extends X_HR_JournalDay {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 607784731165038969L;
+
+	/**
 	 * *** Constructor ***
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 07/10/2014, 10:02:02
 	 * @param ctx

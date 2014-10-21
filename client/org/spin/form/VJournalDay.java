@@ -31,10 +31,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -68,12 +66,11 @@ public class VJournalDay extends JournalDay
 			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener {
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
-		
 		m_WindowNo = WindowNo;
+		
 		Env.setContext(Env.getCtx(), m_WindowNo, "IsSOTrx", "Y");   //  defaults to no
 		trx = Trx.get(trxName, true);
-		try
-		{
+		try	{
 			dyInit();
 			jbInit();
 			frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -112,7 +109,7 @@ public class VJournalDay extends JournalDay
 	private JButton			saveButton		  = new JButton();
 	/** Day Calendar */
 	private JToggleButton[] dayButton;
-	private Vector<Integer> dayYear	  	  	  = null;
+	private KeyNamePair[]    dayYear	  	  	  = null;
 	private Calendar 		cal				  = Calendar.getInstance();
 	/**	First Day */
 	private	int				startDay	 	  = 0;
@@ -171,7 +168,7 @@ public class VJournalDay extends JournalDay
 	public void dyInit() throws Exception{
 		//	GET Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
-		int i=0;
+		
 		MLookup lookupCalendar = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		calendarSearch = new VLookup("HR_Calendar_ID", true, false, true, lookupCalendar);
 		calendarSearch.addVetoableChangeListener(this);
@@ -186,24 +183,23 @@ public class VJournalDay extends JournalDay
 		journalLabel.setPreferredSize(new Dimension(200,20));
 		journalPanel.add(journalLabel);
 		//	Get Journal
-		ArrayList<KeyNamePair> dataIG = getJournal(trxName);
-		journalButton = new JButton[dataIG.size()];
+		KeyNamePair[] dataIG = getJournal(trxName);
+		journalButton = new JButton[dataIG.length];
 		
-		for(KeyNamePair pp : dataIG) {
+		for(int i = 0; i < dataIG.length; i++) {
 			colorLabel = new JLabel();
 			colorLabel.setPreferredSize(new Dimension(20,18));
 			journalButton[i] = new JButton();
-			journalButton[i].setText(pp.toString());
-			journalButton[i].setName(pp.getID().toString());
+			journalButton[i].setText(dataIG[i].getName());
+			journalButton[i].setName(String.valueOf(dataIG[i].getKey()));
 			journalButton[i].addActionListener(this);
 			// Get Color
-			getColor(Integer.parseInt(journalButton[i].getName()),trxName);
+			getColor(dataIG[i].getKey(),trxName);
 			colorLabel.setBackground(new Color(m_RColor, m_GColor, m_BColor));
 			colorLabel.setOpaque(true);
 			journalPanel.add(colorLabel);
 			journalButton[i].setPreferredSize(new Dimension(170,20));
 			journalPanel.add(journalButton[i]);			
-			i++;
 		}
 		rightPanel.add(journalPanel);
 	}
@@ -215,7 +211,6 @@ public class VJournalDay extends JournalDay
 	      dayNumPanel.setPreferredSize(new Dimension(200,120));
 	      dayNumPanel.setMaximumSize(new Dimension(200,121));
 	      dayNumPanel.setLayout(DayLayout);
-
 	      //	Pad space before the first day of the month
 	      for (int i = 0; i < startDay; i++){
 	    	  JLabel dayMonthLabel = new JLabel();
@@ -225,11 +220,11 @@ public class VJournalDay extends JournalDay
 	      //	Print days Button
 	      for (int  i = 1; i <= numberOfDaysInMonth; i++) {
 	    	  dayButton[count] = new JToggleButton();
-	    	  if(getDayColor(dayYear.get(count), m_HR_Calendar_ID,m_C_Year_ID, trxName)==true){
+	    	  if(getDayColor(dayYear[count].getKey(), m_HR_Calendar_ID,m_C_Year_ID, trxName)==true){
 	    		  dayButton[count].setBackground(new Color(m_RColor, m_GColor, m_BColor));
 	    	  }
 	    	  dayButton[count].setText(String.valueOf(i));
-	    	  dayButton[count].setName(dayYear.get(count).toString());
+	    	  dayButton[count].setName(String.valueOf(dayYear[count].getKey()));
 	    	  dayButton[count].setMaximumSize(new Dimension(10,20));
 	    	  dayButton[count].setPreferredSize(new Dimension(10,20));
 	    	  dayNumPanel.add(dayButton[count]);
@@ -240,7 +235,7 @@ public class VJournalDay extends JournalDay
 	} // Day Month
 	
 	public void generateDay(){
-		 dayButton = new JToggleButton[dayYear.size()];
+		 dayButton = new JToggleButton[dayYear.length];
 			for(int x = 1; x<13; x++){
 				dayTitlePanel  = new JPanel();
 		       	monthLabel	   = new JLabel();
@@ -325,10 +320,12 @@ public class VJournalDay extends JournalDay
 			clearData();
 			m_C_Year_ID = ((Integer)value).intValue();
 			dayYear 	= getDayYear(m_C_Year_ID, trxName);
-			if(dayYear.size()==0){
+			
+			if(dayYear.length==0){
 				JOptionPane.showMessageDialog(null, "Generate Day");
 			}
 			else{
+				m_Year		= Integer.parseInt(dayYear[0].getName());
 				generateDay();
 			}
 			centerPanel.revalidate();
