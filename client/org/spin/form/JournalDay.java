@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
 import org.compiere.util.CLogger;
@@ -188,14 +188,12 @@ public class JournalDay
 	 * @return
 	 * @return String
 	 */
-	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, String trxName){
-	
+	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, JLabel[] p_ColorLabel, String trxName){
 		for(int j = 0; j < p_journalButton.length; j++){
 			for(int i = 0; i < p_dayButton.length; i++){ 
-				if(p_dayButton[i].getIconTextGap()==j){
+				if(p_dayButton[i].getBackground().equals(p_ColorLabel[j].getBackground())){
 					MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
 					//	Set Calendar
-					JOptionPane.showMessageDialog(null, p_HR_Calendar_ID);
 					journalDay.setHR_Calendar_ID(p_HR_Calendar_ID);
 					//	Set Day
 					journalDay.setHR_Day_ID(Integer.parseInt(p_dayButton[i].getName()));

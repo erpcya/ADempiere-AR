@@ -154,8 +154,8 @@ public class VJournalLine extends JournalLine
 	private int 			start_Min  		 = 1;
 	private int 			end_Hour 		 = 1;
 	private int 			end_Min 		 = 1;
-	private float 			fstart_Hour		 = 0;
-	private float 			fend_Hour		 = 0;
+	private float 			fstart_Min		 = 0;
+	private float 			fend_Min		 = 0;
 
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
@@ -321,7 +321,7 @@ public class VJournalLine extends JournalLine
 			conceptBox[i].addActionListener(this);
 		    conceptBox[i].setName(String.valueOf(i));
 		    conceptBox[i].setMinimumSize(new Dimension(130, 15));
-		    
+		   
 		    a_IncidenceButton[i].setMinimumSize(new Dimension(10,10));
 		    a_IncidenceButton[i].setMaximumSize(new Dimension(11,11));
 		    a_IncidenceButton[i].setText("+");
@@ -331,9 +331,9 @@ public class VJournalLine extends JournalLine
 		    sliderPanel[i].setLayout(null);
   		    sliderPanel[i].setMaximumSize(new Dimension(s_Hour*25, 15));
 				  
-  		    //	Add Slider Hours rightPanel
+  		    //	Add Slider Hours in rightPanel
 	    	rightPanel.add(sliderPanel[i]);
-			//	Add Label Cocept rightPanel
+			//	Add Label Cocept in rightPanel
 			hPanel[i].setLayout(new BorderLayout()); 
 			hPanel[i].setMaximumSize(new Dimension(250, 15));
 			hPanel[i].add(conceptBox[i], BorderLayout.CENTER);
@@ -341,11 +341,12 @@ public class VJournalLine extends JournalLine
 		    leftPanel.add(hPanel[i]);
 		  
 		    for(int j = 0; j < dataJL.length; j++) {
-	    		getSE_Hour(dataJL[j].getKey(),trxName);
-	    		start_Hour = (((int) m_StartHour.get(j).getTime() /3600000)-4)*120;
-	    		end_Hour   =(((int) m_EndHour.get(j).getTime() /3600000)-4)*120;
-	    		fstart_Hour   = (((((float) m_StartHour.get(j).getTime() /3600000)-4)*120)-start_Hour);
-	    		fend_Hour   =   (((((float) m_EndHour.get(j).getTime()   /3600000)-4)*120)-end_Hour);
+	    		//	Get Start Hour and End Hour
+		    	getSE_Hour(dataJL[j].getKey(),trxName);
+	    		start_Hour  = (((int) m_StartHour.get(j).getTime() /3600000)-4)*120;
+	    		end_Hour    = (((int) m_EndHour.get(j).getTime() /3600000)-4)*120;
+	    		fstart_Min = (((((float) m_StartHour.get(j).getTime() /3600000)-4)*120)-start_Hour);
+	    		fend_Min   = (((((float) m_EndHour.get(j).getTime()   /3600000)-4)*120)-end_Hour);
 	    		addButtonHour(i,j);
 	    	}
 		   
@@ -367,8 +368,8 @@ public class VJournalLine extends JournalLine
 		h_IncidenceButton[iButton].setForeground(new Color(m_RColor, m_GColor, m_BColor));
 		Border thickBorder = new LineBorder(new Color(m_RColor, m_GColor, m_BColor), 0);
 		h_IncidenceButton[iButton].setBorder(thickBorder);
-		h_IncidenceButton[iButton].setSize(new Dimension(((end_Hour+ (int) fend_Hour)-(start_Hour+(int) fstart_Hour)),11));
-		h_IncidenceButton[iButton].setLocation(start_Hour+(int) fstart_Hour, 0);
+		h_IncidenceButton[iButton].setSize(new Dimension(((end_Hour+ (int) fend_Min)-(start_Hour+(int) fstart_Min)),11));
+		h_IncidenceButton[iButton].setLocation(start_Hour+(int) fstart_Min, 0);
 		h_IncidenceButton[iButton].addActionListener(this);
 		h_IncidenceButton[iButton].addMouseListener(this);
 		h_IncidenceButton[iButton].setText(String.valueOf(iButton));
@@ -410,8 +411,8 @@ public class VJournalLine extends JournalLine
 		}
 	}
 	public void actionPerformed(ActionEvent e){
-		int count=conceptBox.length;
-		int j=0; 
+		int count = conceptBox.length;
+		int j     = 0; 
 		if(e.getActionCommand().equals(c_HourButton.getText())){
 			hour_Dialog.setVisible(false);
 		}
@@ -422,14 +423,14 @@ public class VJournalLine extends JournalLine
 			if(conceptBox[i].isSelected()){
 				for(int x = 0; x<t_Button; x++){
 					a_IncidenceButton[i].setVisible(true);
-					if(h_IncidenceButton[x].getIconTextGap()==i)
+					if(h_IncidenceButton[x].getIconTextGap() == i)
 						h_IncidenceButton[x].setVisible(true);		
 				}
 			}
 			else { 
 				for(int x = 0; x < t_Button; x++){
 					a_IncidenceButton[i].setVisible(false);
-					if(h_IncidenceButton[x].getIconTextGap()==i)
+					if(h_IncidenceButton[x].getIconTextGap() == i)
 						h_IncidenceButton[x].setVisible(false);
 				}
 			}
@@ -437,7 +438,7 @@ public class VJournalLine extends JournalLine
 		for(int i = 0;  i < count; i++){
 			if(e.getSource().equals(a_IncidenceButton[i])){
 				addButtonHour(i,t_Button);
-				aux=t_Button-1;
+				aux = t_Button-1;
 				hour_Dialog.setVisible(true);	
 			}
 		}
@@ -446,12 +447,12 @@ public class VJournalLine extends JournalLine
 		}
 		while(true){
 			j++;
-			if(t_Button!=0 && e.getActionCommand().equals(h_IncidenceButton[j-1].getText())){
-				aux=j-1;
+			if(t_Button != 0 && e.getActionCommand().equals(h_IncidenceButton[j-1].getText())){
+				aux = j-1;
 				hour_Dialog.setVisible(true);	
 				break;
 			}
-			if(j==t_Button) break;
+			if(j == t_Button) break;
 		} 
 	} 	//  actionPerformed
 	@Override
@@ -491,13 +492,20 @@ public class VJournalLine extends JournalLine
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 		if(evt.getSource().equals(journalSearch)){
 			m_HR_Journal_ID=(Integer) journalSearch.getValue();
-			setTimeSlot(m_HR_Journal_ID,trxName);
+			//	Get Time Slot Journal Line
+			getTimeSlot(m_HR_Journal_ID,trxName);
+			//	Add Items
 			addItems(m_HR_Journal_ID);
 			m_TimeSlotStart.toString();
 			s_SlotButton.setText(String.valueOf(new Time (m_TimeSlotStart.getTime())));
 			e_SlotButton.setText(String.valueOf(new Time (m_TimeSlotEnd.getTime())));
 		}
 	}
+	/**
+	 * Clear Data
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 14:07:38
+	 * @return void
+	 */
 	public void clearData(){
 		aux=0;
 		s_IncideceButton  = 0;
@@ -507,8 +515,8 @@ public class VJournalLine extends JournalLine
 		end_Hour 		  = 1;
 		end_Min 		  = 1;
 		h_IncidenceButton = null;
- 		fstart_Hour		  = 0;
-		fend_Hour		  = 0;
+ 		fstart_Min		  = 0;
+		fend_Min		  = 0;
 		a_IncidenceButton = null;
 		sliderPanel 	  = null;
 		hPanel 			  = null;
@@ -518,7 +526,7 @@ public class VJournalLine extends JournalLine
 	}
 	/**
 	 * Save Data
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 02/10/2014, 14:21:57
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 02/10/2014, 14:21:57
 	 * @return void
 	 */
 	public void saveData(){
