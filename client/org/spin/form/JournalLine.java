@@ -229,11 +229,11 @@ public class JournalLine {
 			e.printStackTrace();
 		}
 		finally {
-			//	Close Connection
+				//	Close Connection
 			    DB.close(rs,pstmt);
 			    rs=null;
 			    pstmt=null;
-			  }
+		}
 	}
 	
 	/**
@@ -249,13 +249,13 @@ public class JournalLine {
 		MHRJournalLine journalLine = null;
 		for(int i = 0; i<m_HR_Concept_ID.size(); i++){			
 			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
-			//	Set Concept
-			journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-			//	Set Journal
-		 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 			for(int j = 0; j<slider[i].getComponentCount(); j++){					
 				for(int x = 0; x<hours.length; x++){
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
+						//	Set Concept
+						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+						//	Set Journal
+					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 						//	Set Start Hour 
 						journalLine.setStartTime(m_StartHour.get(x));
 						//	Set End Hour

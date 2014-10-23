@@ -34,7 +34,7 @@ import org.spin.model.MHRJournalDay;
  * @author victor.perez@e-evolution.com, www.e-evolution.com
  *
  */
-public class JournalDay 
+public class JournalDay
 {
 	/**	Window No						*/
 	public int         				m_WindowNo 				= 0;
@@ -107,7 +107,7 @@ public class JournalDay
 										" INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID = jd.HR_Journal_ID)" +
 										" INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID)" +
 										" INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID)" +
-										" WHERE jd.HR_Day_ID = ? AND c.HR_Calendar_ID = ? AND y.C_Year_ID = ?", null);
+										" WHERE jd.HR_Day_ID = ? AND c.HR_Calendar_ID = ? AND y.C_Year_ID = ?", trxName);
 			//	Set HR_Day_ID
 			pstmt.setInt(1, p_HR_day_ID);
 			//	Set HR_Calendar_ID
@@ -154,28 +154,28 @@ public class JournalDay
 			pstmt = DB.prepareStatement(" SELECT Red, Green, Blue, HR_Journal_ID" +
 										" FROM HR_Journal" +
 										" WHERE HR_Journal_ID = ?", trxName);
-		//	Set Journal
-		pstmt.setInt(1, p_HR_Journal_ID);
-		rs = pstmt.executeQuery();
-		
-		while (rs.next()) {				
-			//	Red Color
-			m_RColor = rs.getInt(1);
-			//	Green Color
-			m_GColor = rs.getInt(2);
-			//	Blue Color
-			m_BColor = rs.getInt(3);	
-		}
+			//	Set Journal
+			pstmt.setInt(1, p_HR_Journal_ID);
+			rs = pstmt.executeQuery();
+	
+			while (rs.next()) {				
+				//	Red Color
+				m_RColor = rs.getInt(1);
+				//	Green Color
+				m_GColor = rs.getInt(2);
+				//	Blue Color
+				m_BColor = rs.getInt(3);	
+			}
 		} 
 		catch (SQLException e) {
-		e.printStackTrace();
+			e.printStackTrace();
 		}
 		finally {
 			//	Close Connection
 		    DB.close(rs,pstmt);
 		    rs=null;
 		    pstmt=null;
-		  }
+		}
 	}
 	
 	/**
@@ -189,6 +189,7 @@ public class JournalDay
 	 * @return String
 	 */
 	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, JLabel[] p_ColorLabel, String trxName){
+		
 		for(int j = 0; j < p_journalButton.length; j++){
 			for(int i = 0; i < p_dayButton.length; i++){ 
 				if(p_dayButton[i].getBackground().equals(p_ColorLabel[j].getBackground())){
@@ -206,4 +207,6 @@ public class JournalDay
 		}
 		 return "Save";
 	}
+
+	
 }
