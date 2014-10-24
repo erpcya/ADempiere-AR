@@ -204,13 +204,14 @@ public class VJournalDay extends JournalDay
 		journalButton = new JButton[dataIG.length];
 		colorLabel = new JLabel[dataIG.length];
 		for(int i = 0; i < dataIG.length; i++) {
+			//	Journal Button
 			journalButton[i] = new JButton();
 			journalButton[i].setText(dataIG[i].getName());
 			journalButton[i].setName(String.valueOf(dataIG[i].getKey()));
 			journalButton[i].setPreferredSize(new Dimension(170,20));
 			journalButton[i].addActionListener(this);
 			journalButton[i].addMouseListener(this);
-			// Get Color
+			//	Get Color for Label
 			getColor(dataIG[i].getKey(),trxName);
 			colorLabel[i] = new JLabel();
 			colorLabel[i].setPreferredSize(new Dimension(20,18));
@@ -239,14 +240,14 @@ public class VJournalDay extends JournalDay
 	      dayNumPanel = new JPanel();
 	      dayNumPanel.setPreferredSize(new Dimension(200,120));
 	      dayNumPanel.setLayout(DayLayout);
-	      //	Pad space before the first day of the month
+	      //  Pad space before the first day of the month
 	      for (int i = 0; i < startDay; i++){
 	    	  JLabel dayMonthLabel = new JLabel();
 	    	  dayMonthLabel.setText("   ");
 	    	  dayNumPanel.add(dayMonthLabel);
 	      }
 
-	      //	Print days Button
+	      //  Print days Button
 	      for (int  i = 1; i <= numberDays; i++) {
 	    	  dayButton[count] = new JToggleButton();
 	    	  if(getDayColor(dayYear[count].getKey(), m_HR_Calendar_ID,m_C_Year_ID, trxName)==true){
@@ -257,8 +258,7 @@ public class VJournalDay extends JournalDay
 	    	  dayButton[count].setBorder(BorderFactory.createEtchedBorder());
 	    	  dayNumPanel.add(dayButton[count]);
 	    	  count++;
-	      }
-				
+	      } 
 	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, rows+2, 1, 1, 0.0, 0.0
 					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 15), 0, 0));
 	      
@@ -379,6 +379,7 @@ public class VJournalDay extends JournalDay
 			//	Get Value Calendar Search
 			m_HR_Calendar_ID=(Integer) calendarSearch.getValue();
 		}
+		//	Load Day of the Year
 		if(evt.getSource().equals(yearSearch)){
 			clearData();
 			m_C_Year_ID = ((Integer)value).intValue();
@@ -393,6 +394,7 @@ public class VJournalDay extends JournalDay
 			}
 			centerPanel.revalidate();
 		}
+		
 		if(evt.getSource().equals(calendarSearch)){
 			clearData();
 			if(m_C_Year_ID!=0){
@@ -400,7 +402,7 @@ public class VJournalDay extends JournalDay
 				generateDay();
 			}
 			centerPanel.revalidate();
-		}
+		} 
 	}
 	/**
 	 * Clear Data
@@ -421,20 +423,16 @@ public class VJournalDay extends JournalDay
 	 * @return void
 	 */
 	public void saveData(){
-		try
-		{
-			Trx.run(new TrxRunnable() 
-			{
-				public void run(String trxName)
-				{
+		try	{
+			Trx.run(new TrxRunnable() {
+				public void run(String trxName)	{
 					statusBar.setStatusLine(saveCalendar(m_HR_Calendar_ID, journalButton, dayButton, colorLabel, trxName));
 					rightPanel.repaint();
 					clearData();
 				}
 			});
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			ADialog.error(m_WindowNo, mainPanel, "Error", e.getLocalizedMessage());
 			return;
 		}
@@ -452,6 +450,6 @@ public class VJournalDay extends JournalDay
 	public int getNumberDays(int year, int month) {
 		cal.set(year, month-1, 1);
 		return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-	    	}
+	}
 		 
 }
