@@ -15,9 +15,11 @@
  *****************************************************************************/
 package org.spin.form;
 
+import java.awt.Color;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -36,29 +38,30 @@ import org.spin.model.MHRJournalDay;
  */
 public class JournalDay
 {
-	/**	Window No						*/
+	/**	Window No											*/
 	public int         				m_WindowNo 				= 0;
-	/**	Calendar						*/
+	/**	Calendar											*/
 	protected int 					m_HR_Calendar_ID 		= 0;
-	/**	IncidenceGroup					*/
+	/**	Incidence Group										*/
 	protected int					m_HR_IncidenceGroup_ID  = 0;
-	/**	Year ID							*/
+	/**	Year ID												*/
 	protected int 					m_C_Year_ID				= 0;
-	/**	Client							*/
+	/**	Client												*/
 	protected int 					m_AD_Client_ID 			= 0;
-	/**	Organization					*/
+	/**	Organization										*/
 	protected int 					m_AD_Org_ID 			= 0;
-	/**	Year							*/
+	/**	Year												*/
 	protected int					m_Year					= 0;
-	/** Red Color						*/
+	/** Red Color											*/
 	protected int 					m_RColor				= 0;
-	/** Green Color						*/
+	/** Green Color											*/
 	protected int 					m_GColor				= 0;
-	/** Blue Color						*/
+	/** Blue Color											*/
 	protected int 					m_BColor				= 0;
-	/**	Logger							*/
-	public static CLogger 			log 					= CLogger.getCLogger(JournalDay.class);
-
+	/**	Logger												*/
+	public static CLogger		log 		= CLogger.getCLogger(JournalDay.class);
+	protected ArrayList<Color>	m_Color = null;
+	protected ArrayList<Integer>  day_ID= null;
 	/** 
 	 * Get Day of Year
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 09:17:23
@@ -67,23 +70,24 @@ public class JournalDay
 	 * @return
 	 * @return KeyNamePair[]
 	 */
-	protected KeyNamePair[] getDayYear(int p_HR_Year_ID, String trxName){
-		return DB.getKeyNamePairs(" SELECT HR_Day_ID, FiscalYear " +
-								  " FROM HR_Day AS d" +
-								  " INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) WHERE y.C_Year_ID = "+p_HR_Year_ID, false);
+	protected KeyNamePair[] getDayYear(int p_HR_Year_ID) {
+		return DB.getKeyNamePairs("SELECT HR_Day_ID, FiscalYear " +
+								  "FROM HR_Day AS d " +
+								  "INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
+								  "WHERE y.C_Year_ID = "+p_HR_Year_ID, false);
 	}
 
 	/**
-	 *  Get Journal
+	 *  Get Journal Data
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 09/10/2014, 16:58:12
 	 * @param 
 	 * @param trxName
 	 * @return
 	 * @return KeyNamePair[]
 	 */
-	protected KeyNamePair[] getJournal(String trxName){
-		return DB.getKeyNamePairs(" SELECT HR_Journal_ID, Name " +
-								  " FROM HR_Journal", false);
+	protected KeyNamePair[] getJournal() {
+		return DB.getKeyNamePairs("SELECT HR_Journal_ID, Name " +
+								  "FROM HR_Journal", false);
 	}
 	
 	/** 
@@ -96,35 +100,30 @@ public class JournalDay
 	 * @return
 	 * @return boolean
 	 */
-	protected boolean getDayColor(int p_HR_day_ID, int p_HR_Calendar_ID, int p_C_Year_ID, String trxName){
-		boolean			  result = false;
+	protected ArrayList<Color> getDayColor(int p_HR_Calendar_ID, int p_C_Year_ID, String trxName) {
 		ResultSet 		  rs 	 = null;
 		PreparedStatement pstmt  = null;
+		int i=0;
 		try	{
-			pstmt = DB.prepareStatement(" SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
-										" FROM HR_JournalDay AS jd" +
-										" INNER JOIN HR_Calendar AS c ON(jd.HR_Calendar_ID = c.HR_Calendar_ID)" +
-										" INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID = jd.HR_Journal_ID)" +
-										" INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID)" +
-										" INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID)" +
-										" WHERE jd.HR_Day_ID = ? AND c.HR_Calendar_ID = ? AND y.C_Year_ID = ?", trxName);
-			//	Set HR_Day_ID
-			pstmt.setInt(1, p_HR_day_ID);
+			pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
+										"FROM HR_JournalDay AS jd " +
+										"INNER JOIN HR_Calendar AS c ON(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
+										"INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID = jd.HR_Journal_ID) " +
+										"INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID) " +
+										"INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
+										"WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?", trxName);
+			
 			//	Set HR_Calendar_ID
-			pstmt.setInt(2, p_HR_Calendar_ID);
+			pstmt.setInt(1, p_HR_Calendar_ID);
 			//	Set C_Year_ID
-			pstmt.setInt(3, p_C_Year_ID);
+			pstmt.setInt(2, p_C_Year_ID);
 			
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {
-				//	Red Color
-				m_RColor = rs.getInt(2);
-				//	Green Color
-				m_GColor = rs.getInt(3);
-				//	Blue Color
-				m_BColor = rs.getInt(4);	
-				result=true;
+				m_Color.add(i,new Color(rs.getInt(2), rs.getInt(3),rs.getInt(4)));
+				day_ID.add(rs.getInt(1));
+				i++;
 			}
 		} 
 		catch (SQLException e) {
@@ -136,24 +135,25 @@ public class JournalDay
 			    rs=null;
 			    pstmt=null;
 			  }
-		return result;
+			
+		return m_Color;
 	}
 	
 	/**
-	 * Get Color
+	 * Get Color From Journal Day
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 13/10/2014, 15:32:37
 	 * @param p_HR_Journal_ID
 	 * @param trxName
 	 * @return
 	 * @return int
 	 */
-	protected void getColor(int p_HR_Journal_ID, String trxName){
+	protected void getColor(int p_HR_Journal_ID, String trxName) {
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
 		try	{
-			pstmt = DB.prepareStatement(" SELECT Red, Green, Blue, HR_Journal_ID" +
-										" FROM HR_Journal" +
-										" WHERE HR_Journal_ID = ?", trxName);
+			pstmt = DB.prepareStatement("SELECT Red, Green, Blue, HR_Journal_ID " +
+										"FROM HR_Journal " +
+										"WHERE HR_Journal_ID = ?", trxName);
 			//	Set Journal
 			pstmt.setInt(1, p_HR_Journal_ID);
 			rs = pstmt.executeQuery();
@@ -188,11 +188,12 @@ public class JournalDay
 	 * @return
 	 * @return String
 	 */
-	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, JLabel[] p_ColorLabel, String trxName){
+	protected String saveCalendar(int p_HR_Calendar_ID, JButton[] p_journalButton, JToggleButton[] p_dayButton, JLabel[] p_ColorLabel, String trxName) {
 		
-		for(int j = 0; j < p_journalButton.length; j++){
-			for(int i = 0; i < p_dayButton.length; i++){ 
-				if(p_dayButton[i].getBackground().equals(p_ColorLabel[j].getBackground())){
+		for(int j = 0; j < p_journalButton.length; j++) {
+			for(int i = 0; i < p_dayButton.length; i++) { 
+				if(p_dayButton[i].getBackground()
+						.equals(p_ColorLabel[j].getBackground())) {
 					MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
 					//	Set Calendar
 					journalDay.setHR_Calendar_ID(p_HR_Calendar_ID);
@@ -207,6 +208,4 @@ public class JournalDay
 		}
 		 return "Save";
 	}
-
-	
 }

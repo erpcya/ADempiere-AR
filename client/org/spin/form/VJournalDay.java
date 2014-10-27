@@ -110,8 +110,9 @@ public class VJournalDay extends JournalDay
 	/** Save */
 	private JButton			saveButton		  = new JButton();
 	/** Day Calendar 			*/
-	private JToggleButton[] dayButton;
+	private JToggleButton[] dayButton		  = null;
 	private KeyNamePair[]   dayYear	  	  	  = null;
+	/** Calendar				*/
 	private Calendar 		cal				  = Calendar.getInstance();
 	/**	First Day 				*/
 	private	int				startDay	 	  = 0;
@@ -139,7 +140,6 @@ public class VJournalDay extends JournalDay
 	private JLabel		    journalLabel	  = new JLabel();
 
 	private void jbInit() throws Exception {
-		
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
 		mainPanel.setMinimumSize(new Dimension(500, 500));
@@ -179,18 +179,18 @@ public class VJournalDay extends JournalDay
 		mainPanel.add(southPanel, BorderLayout.SOUTH);
 	}
 	
-	public void dyInit() throws Exception{
-		//	GET Calendar
+	public void dyInit() throws Exception {
+		//	Get Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
 		MLookup lookupCalendar = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		calendarSearch = new VLookup("HR_Calendar_ID", true, false, true, lookupCalendar);
 		calendarSearch.addVetoableChangeListener(this);
-		//	GET Year
+
+		//	Get Year
 		AD_Column_ID = 54927;		//	HR_Year.HR_Year_Id	
 		MLookup lookupYear = MLookupFactory.get(Env.getCtx(), m_WindowNo, 0, AD_Column_ID, DisplayType.TableDir);
 		yearSearch = new VLookup("C_Year_ID", true, false, true, lookupYear);
 		yearSearch.addVetoableChangeListener(this);	
-		
 		//	Status Bar
 		statusBar.setStatusLine(Msg.getMsg(Env.getCtx(), "Journal"));
 		statusBar.setStatusDB("");
@@ -200,7 +200,7 @@ public class VJournalDay extends JournalDay
 		journalPanel.setPreferredSize(new Dimension(200,20));
 		journalPanel.add(journalLabel);
 		//	Get Journal Data
-		KeyNamePair[] dataIG = getJournal(trxName);
+		KeyNamePair[] dataIG = getJournal();
 		journalButton = new JButton[dataIG.length];
 		colorLabel = new JLabel[dataIG.length];
 		for(int i = 0; i < dataIG.length; i++) {
@@ -211,6 +211,7 @@ public class VJournalDay extends JournalDay
 			journalButton[i].setPreferredSize(new Dimension(170,20));
 			journalButton[i].addActionListener(this);
 			journalButton[i].addMouseListener(this);
+			journalButton[i].setEnabled(false);
 			//	Get Color for Label
 			getColor(dataIG[i].getKey(),trxName);
 			colorLabel[i] = new JLabel();
@@ -224,7 +225,12 @@ public class VJournalDay extends JournalDay
 		//	Add Journal
 		rightPanel.add(journalPanel);
 	}
-	
+	public void statusJournal(boolean status){
+		for(int i = 0; i < journalButton.length; i++) {
+			//	Journal Button
+			journalButton[i].setEnabled(status);
+		}
+	}
 	/**
 	 * Add Days of the Month From Calendar
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 16:54:22
@@ -246,12 +252,12 @@ public class VJournalDay extends JournalDay
 	    	  dayMonthLabel.setText("   ");
 	    	  dayNumPanel.add(dayMonthLabel);
 	      }
-
 	      //  Print days Button
 	      for (int  i = 1; i <= numberDays; i++) {
 	    	  dayButton[count] = new JToggleButton();
-	    	  if(getDayColor(dayYear[count].getKey(), m_HR_Calendar_ID,m_C_Year_ID, trxName)==true){
-	    		  dayButton[count].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+	    	  getDayColor(m_HR_Calendar_ID,m_C_Year_ID, trxName);
+	    	  if(dayYear[count].getKey() == day_ID.get(count)){
+	    		  dayButton[count].setBackground(m_Color.get(count));
 	    	  }
 	    	  dayButton[count].setText(String.valueOf(i));
 	    	  dayButton[count].setName(String.valueOf(dayYear[count].getKey()));
@@ -270,8 +276,9 @@ public class VJournalDay extends JournalDay
 	 * @return void
 	 */
 	public void generateDay(){
+		statusJournal(true);
 		 dayButton = new JToggleButton[dayYear.length];
-			for(int x = 1; x<13; x++){
+			for(int x = 1; x < 13; x++){
 				dayTitlePanel  = new JPanel();
 				monthLabel	   = new JLabel();
 		    	monthYearPanel = new JPanel();
@@ -281,26 +288,26 @@ public class VJournalDay extends JournalDay
 		    	//	Print Month Name
 				monthLabel.setText(mFormatter.format(getDate));
 				monthYearPanel.add(monthLabel);
-				
-				dayTitlePanel.add(monthYearPanel);
 				dayTitlePanel.setLayout(new GridLayout(0, 7));
+				dayTitlePanel.add(monthYearPanel);
 				
-				for(int i = 0; i<7; i++){
-					dayLabel	= new JLabel(dFormatter.format(getDate));
+				for(int i = 0; i < 7; i++){
+					dayLabel = new JLabel(dFormatter.format(getDate));
 					//	Set Date
 					cal.set(2014, 8, i);
-					getDate 	= cal.getTime();
+					getDate  = cal.getTime();
 			       	//	Print Day Name 
-					dayLabel.setText(" "+dFormatter.format(getDate));
+					dayLabel.setText(dFormatter.format(getDate));
 			       	dayTitlePanel.add(dayLabel);
 				}
-		        if(cols==4){ 
-		        	rows=x; cols=0;     
+		        if(cols == 4){ 
+		        	rows = x; 
+		        	cols = 0;     
 		        }
 		        centerPanel.add(monthYearPanel,  new GridBagConstraints(cols, rows, 1, 1, 0.0, 0.0
      			   		,GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 			    centerPanel.add(dayTitlePanel,  new GridBagConstraints(cols, rows+1, 1, 1, 0.0, 0.0
-						,GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 5), 0, 0));
+						,GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 1, 0, 5), 0, 0));
 			    //	Add Day of the Month
 			   dayMonth(m_Year,x);
 			   cols++;	
@@ -322,10 +329,12 @@ public class VJournalDay extends JournalDay
 			if(e.getActionCommand().equals(journalButton[i].getText())){
 				//	Get Color
 				getColor(Integer.parseInt(journalButton[i].getName()),trxName);
-				for(int j = 0; j < dayButton.length; j++){
-					if(dayButton[j].isSelected()){
-						dayButton[j].setSelected(false);
-						dayButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+				if(dayButton!=null){
+					for(int j = 0; j < dayButton.length; j++){
+						if(dayButton[j].isSelected()){
+							dayButton[j].setSelected(false);
+							dayButton[j].setBackground(new Color(m_RColor, m_GColor, m_BColor));
+						}
 					}
 				}
 			}
@@ -349,9 +358,11 @@ public class VJournalDay extends JournalDay
 			// Add Border from Day Button
 			for(int i = 0; i < journalButton.length; i++){
 				if(e.getSource().equals(journalButton[i])){
-					for(int j = 0; j < dayButton.length; j++){
-						if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
-							dayButton[j].setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+					if(dayButton != null){
+						for(int j = 0; j < dayButton.length; j++){
+							if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
+								dayButton[j].setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+							}
 						}
 					}
 				}
@@ -363,9 +374,11 @@ public class VJournalDay extends JournalDay
 		// Remove Border from Day Button
 		for(int i = 0; i < journalButton.length; i++){
 			if(e.getSource().equals(journalButton[i])){
-				for(int j = 0; j < dayButton.length; j++){
-					if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
-						dayButton[j].setBorder(BorderFactory.createEtchedBorder());
+				if(dayButton!=null){
+					for(int j = 0; j < dayButton.length; j++){
+						if(dayButton[j].getBackground().equals(colorLabel[i].getBackground())){
+							dayButton[j].setBorder(BorderFactory.createEtchedBorder());
+						}
 					}
 				}
 			}
@@ -377,15 +390,15 @@ public class VJournalDay extends JournalDay
 		Object value = evt.getNewValue();
 		if(evt.getSource().equals(calendarSearch)){
 			//	Get Value Calendar Search
-			m_HR_Calendar_ID=(Integer) calendarSearch.getValue();
+			m_HR_Calendar_ID = (Integer) calendarSearch.getValue();
 		}
 		//	Load Day of the Year
 		if(evt.getSource().equals(yearSearch)){
 			clearData();
 			m_C_Year_ID = ((Integer)value).intValue();
-			dayYear 	= getDayYear(m_C_Year_ID, trxName);
+			dayYear 	= getDayYear(m_C_Year_ID);
 			
-			if(dayYear.length==0){
+			if(dayYear.length == 0){
 				JOptionPane.showMessageDialog(null, "Generate Day");
 			}
 			else{
@@ -397,7 +410,7 @@ public class VJournalDay extends JournalDay
 		
 		if(evt.getSource().equals(calendarSearch)){
 			clearData();
-			if(m_C_Year_ID!=0){
+			if(m_C_Year_ID != 0){
 				//	Generate Day of Month
 				generateDay();
 			}
@@ -413,9 +426,10 @@ public class VJournalDay extends JournalDay
 		startDay = 0;
 		count	 = 0;
 		cols	 = 0;
-		rows		 = 0;
+		rows	 = 0;
 		centerPanel.removeAll();
 		centerPanel.repaint();
+		statusJournal(false);
 	}
 	/**
 	 * Save Journal Day Data
@@ -438,7 +452,6 @@ public class VJournalDay extends JournalDay
 		}
 	}
 	
-		 
 	/** 
 	 * 	Get the number of days in a month	 
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:36:20

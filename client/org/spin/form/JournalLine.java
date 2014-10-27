@@ -37,35 +37,35 @@ import org.spin.model.MHRJournalLine;
  *
  */
 public class JournalLine {
-	/**	Window No						*/
+	/**	Window No											*/
 	public int         				m_WindowNo 				= 0;
-	/**	Journal							*/
+	/**	Journal												*/
 	protected int 					m_HR_Journal_ID 		= 0;
-	/**	Incidence Group					*/
+	/**	Incidence Group										*/
 	protected int					m_HR_IncidenceGroup_ID  = 0;
-	/** Red Color						*/
+	/** Red Color											*/
 	protected int 					m_RColor				= 0;
-	/** Green Color						*/
+	/** Green Color											*/
 	protected int 					m_GColor				= 0;
-	/** Blue Color						*/
+	/** Blue Color											*/
 	protected int 					m_BColor				= 0;
-	/** Start Time						*/
+	/** Start Time											*/
 	protected Timestamp 			m_TimeSlotStart 		= null;
-	/** End Time						*/
+	/** End Time											*/
 	protected Timestamp 			m_TimeSlotEnd 			= null;
-	/**	Client							*/
+	/**	Client												*/
 	protected int 					m_AD_Client_ID 			= 0;
-	/**	Organization					*/
+	/**	Organization										*/
 	protected int 					m_AD_Org_ID 			= 0;
-	/**	Concept							*/
+	/**	Concept												*/
 	protected ArrayList<Integer> 	m_HR_Concept_ID			= new ArrayList<Integer>();
-	/** StartHour						*/
+	/** StartHour											*/
 	protected ArrayList<Timestamp> 	m_StartHour				= new ArrayList<Timestamp>();
-	/** EndHour							*/
+	/** EndHour												*/
 	protected ArrayList<Timestamp> 	m_EndHour				= new ArrayList<Timestamp>();
-	/**	Logger							*/
+	/**	Logger												*/
 	public static CLogger 			log 					= CLogger.getCLogger(JournalDay.class);
-	/**	Counter							*/
+	/**	Counter												*/
 	protected int 					m_count					= 0;
 	
 	/**
@@ -77,13 +77,12 @@ public class JournalLine {
 	 * @return
 	 * @return KeyNamePair[]
 	 */
-	protected KeyNamePair[] getJournalLineData(int p_HR_Journal_ID, int p_HR_Concept_ID, String trxName){
-		KeyNamePair[] data = DB.getKeyNamePairs(" SELECT jl.HR_JournalLine_ID, jl.AD_Org_ID" +
-												" FROM HR_JournalLine AS jl" +
-												" INNER JOIN HR_Concept AS c  ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
-												" INNER JOIN HR_Journal AS j ON(jl.HR_Journal_ID = j.HR_Journal_ID)" +
-												" WHERE jl.HR_Journal_ID = "+p_HR_Journal_ID+" AND jl.HR_Concept_ID = "+p_HR_Concept_ID,false);
-		return data;
+	protected KeyNamePair[] getJournalLineData(int p_HR_Journal_ID, int p_HR_Concept_ID){
+		return DB.getKeyNamePairs(" SELECT jl.HR_JournalLine_ID, jl.AD_Org_ID" +
+								  " FROM HR_JournalLine AS jl" +
+								  " INNER JOIN HR_Concept AS c ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
+								  " INNER JOIN HR_Journal AS j ON(jl.HR_Journal_ID = j.HR_Journal_ID)" +
+								  " WHERE jl.HR_Journal_ID = "+p_HR_Journal_ID+" AND jl.HR_Concept_ID = "+p_HR_Concept_ID,false);
 	}
 	
 	/**
@@ -94,12 +93,16 @@ public class JournalLine {
 	 * @return
 	 * @return KeyNamePair[]
 	 */
-	protected  KeyNamePair[] getGroupIncidenceData(int p_HR_Journal_ID, String trxName){
+	protected  KeyNamePair[] getConceptData(int p_HR_Journal_ID){
 		return DB.getKeyNamePairs(" SELECT c.HR_Concept_ID, c.Name" +
 								  " FROM HR_JournalLine AS jl" +
-								  " INNER JOIN HR_Concept AS c  ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
+								  " INNER JOIN HR_Concept AS c ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
 								  " INNER JOIN HR_Journal AS j ON(jl.HR_Journal_ID = j.HR_Journal_ID)" +
 								  " WHERE jl.HR_Journal_ID = "+p_HR_Journal_ID+" GROUP BY c.HR_Concept_ID", false);
+	}
+	protected  KeyNamePair[] getGroupIncidenceData(){
+		return DB.getKeyNamePairs(" SELECT i.HR_IncidenceGroup_ID, i.name" +
+								  " FROM HR_IncidenceGroup AS i", false);
 	}
 	
 	/**
@@ -137,14 +140,14 @@ public class JournalLine {
 	protected Timestamp getStarHour(int p_HR_JournalLine_ID, String trxName){
 		return DB.getSQLValueTS(trxName, " SELECT jl.StartTime" +
 										 " FROM HR_JournalLine as jl" +
-										 " INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID)" +
-										 " INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID)" +
-										 " WHERE jl.HR_JournalLine_ID=?", p_HR_JournalLine_ID);
+										 " INNER JOIN HR_Concept as c ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
+										 " INNER JOIN HR_Journal as j ON(jl.HR_Journal_ID = j.HR_Journal_ID)" +
+										 " WHERE jl.HR_JournalLine_ID = ?", p_HR_JournalLine_ID);
 	}
 	
 	/**
 	 * Get End Hour From Journal Line
-	 *@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 10:17:10
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 10:17:10
 	 * @param p_HR_JournalLine_ID
 	 * @param trxName
 	 * @return
@@ -153,9 +156,9 @@ public class JournalLine {
 	protected Timestamp getEndHour(int p_HR_JournalLine_ID, String trxName){
 		return DB.getSQLValueTS(trxName, " SELECT jl.EndTime" +
 										 " FROM HR_JournalLine as jl" +
-										 " INNER JOIN HR_Concept as c  on(jl.HR_Concept_ID = c.HR_Concept_ID)" +
-										 " INNER JOIN HR_Journal as j on(jl.HR_Journal_ID = j.HR_Journal_ID)" +
-										 " WHERE jl.HR_journalLine_ID =?", p_HR_JournalLine_ID);
+										 " INNER JOIN HR_Concept as c ON(jl.HR_Concept_ID = c.HR_Concept_ID)" +
+										 " INNER JOIN HR_Journal as j ON(jl.HR_Journal_ID = j.HR_Journal_ID)" +
+										 " WHERE jl.HR_journalLine_ID = ?", p_HR_JournalLine_ID);
 	}
 	
 	/**
@@ -198,7 +201,7 @@ public class JournalLine {
 	}
 	
 	/**
-	 * Get color
+	 * Get color for Incididence Button
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/09/2014, 16:22:31
 	 * @param p_HR_Concept_ID
 	 * @param trxName
@@ -212,7 +215,7 @@ public class JournalLine {
 			pstmt = DB.prepareStatement(" SELECT ig.Red, ig.Green, ig.Blue, igc.HR_Concept_ID" +
 										" FROM HR_IGConcept AS igc" +
 										" INNER JOIN HR_IncidenceGroup AS ig ON(igc.HR_IncidenceGroup_ID = ig.HR_IncidenceGroup_ID)" +
-										" WHERE igc.HR_Concept_ID =?", null);
+										" WHERE igc.HR_Concept_ID = ?", trxName);
 			pstmt.setInt(1, p_HR_Concept_ID);
 			rs = pstmt.executeQuery();
 			
@@ -247,9 +250,9 @@ public class JournalLine {
 	 */
 	protected String saveJournalLine(JPanel[] slider, JButton[] hours, String trxName){
 		MHRJournalLine journalLine = null;
-		for(int i = 0; i<m_HR_Concept_ID.size(); i++){			
+		for(int i = 0; i < m_HR_Concept_ID.size(); i++){			
 			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
-			for(int j = 0; j<slider[i].getComponentCount(); j++){					
+			for(int j = 0; j < slider[i].getComponentCount(); j++){					
 				for(int x = 0; x<hours.length; x++){
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
 						//	Set Concept
@@ -268,4 +271,5 @@ public class JournalLine {
 		}
 		 return "Save";
 	}
+	
 }
