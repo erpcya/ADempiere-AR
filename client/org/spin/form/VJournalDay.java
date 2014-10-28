@@ -255,9 +255,10 @@ public class VJournalDay extends JournalDay
 	      //  Print days Button
 	      for (int  i = 1; i <= numberDays; i++) {
 	    	  dayButton[count] = new JToggleButton();
-	    	  getDayColor(m_HR_Calendar_ID,m_C_Year_ID, trxName);
-	    	  if(dayYear[count].getKey() == day_ID.get(count)){
-	    		  dayButton[count].setBackground(m_Color.get(count));
+	    	  for(int j=0;j<m_Color.size(); j++){
+	    		  if(dayYear[count].getKey() == day_ID.get(j)){
+	    			  dayButton[count].setBackground(m_Color.get(j));
+	    		  }  
 	    	  }
 	    	  dayButton[count].setText(String.valueOf(i));
 	    	  dayButton[count].setName(String.valueOf(dayYear[count].getKey()));
@@ -397,7 +398,7 @@ public class VJournalDay extends JournalDay
 			clearData();
 			m_C_Year_ID = ((Integer)value).intValue();
 			dayYear 	= getDayYear(m_C_Year_ID);
-			
+	    	getDayColor(m_HR_Calendar_ID,m_C_Year_ID, trxName);
 			if(dayYear.length == 0){
 				JOptionPane.showMessageDialog(null, "Generate Day");
 			}

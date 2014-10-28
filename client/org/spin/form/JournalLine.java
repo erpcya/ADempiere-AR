@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.compiere.util.CLogger;
@@ -67,7 +68,9 @@ public class JournalLine {
 	public static CLogger 			log 					= CLogger.getCLogger(JournalDay.class);
 	/**	Counter												*/
 	protected int 					m_count					= 0;
-	
+	protected Timestamp m_StartSlotHour=null;
+	protected Timestamp m_EndSlotHour=null;
+  
 	/**
 	 * Get Journal Line Data
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 10:14:44
@@ -248,8 +251,15 @@ public class JournalLine {
 	 * @return
 	 * @return String
 	 */
-	protected String saveJournalLine(JPanel[] slider, JButton[] hours, String trxName){
+	protected String saveJournalLine( JPanel[] slider, JButton[] hours, String trxName){
 		MHRJournalLine journalLine = null;
+		JOptionPane.showMessageDialog(null, m_EndSlotHour);
+//		MHRJournal journal = null;
+//		journal =new MHRJournal(Env.getCtx(), m_HR_Journal_ID, trxName);
+//		journal.setHR_Journal_ID(m_HR_Journal_ID);
+//		journal.setTimeSlotStart(Timestamp.valueOf(dateFormat.format(m_StartSlotHour)));
+//		journal.setTimeSlotEnd(Timestamp.valueOf(dateFormat.format(m_EndSlotHour)));
+//		journal.saveEx(trxName);
 		for(int i = 0; i < m_HR_Concept_ID.size(); i++){			
 			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
 			for(int j = 0; j < slider[i].getComponentCount(); j++){					

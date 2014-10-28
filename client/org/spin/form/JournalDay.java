@@ -59,9 +59,9 @@ public class JournalDay
 	/** Blue Color											*/
 	protected int 					m_BColor				= 0;
 	/**	Logger												*/
-	public static CLogger		log 		= CLogger.getCLogger(JournalDay.class);
-	protected ArrayList<Color>	m_Color = null;
-	protected ArrayList<Integer>  day_ID= null;
+	public static CLogger			log 		= CLogger.getCLogger(JournalDay.class);
+	protected ArrayList<Color>		m_Color = new ArrayList<Color>();
+	protected ArrayList<Integer>	day_ID= new ArrayList<Integer>();
 	/** 
 	 * Get Day of Year
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 09:17:23
@@ -103,7 +103,7 @@ public class JournalDay
 	protected ArrayList<Color> getDayColor(int p_HR_Calendar_ID, int p_C_Year_ID, String trxName) {
 		ResultSet 		  rs 	 = null;
 		PreparedStatement pstmt  = null;
-		int i=0;
+		
 		try	{
 			pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
 										"FROM HR_JournalDay AS jd " +
@@ -121,9 +121,9 @@ public class JournalDay
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {
-				m_Color.add(i,new Color(rs.getInt(2), rs.getInt(3),rs.getInt(4)));
+				m_Color.add(new Color(rs.getInt(2),rs.getInt(3),rs.getInt(4)));
 				day_ID.add(rs.getInt(1));
-				i++;
+		
 			}
 		} 
 		catch (SQLException e) {

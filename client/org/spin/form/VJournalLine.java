@@ -35,12 +35,9 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
-import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -52,7 +49,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextField;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -120,12 +116,14 @@ public class VJournalLine extends JournalLine
 	/** Journal 									*/
 	private JLabel 					journalLabel     = new JLabel();
 	private VLookup 				journalSearch    = null;
+	/**	Time Format Text							*/
+    private DateFormat 				timeFormat		 = new SimpleDateFormat("k:mm");
 	/** Start Hours Slot 									*/
 	private JLabel					s_SlotLabel	     = new JLabel();
-	private JTextField				s_SlotButton 	 = new JTextField(5);
+	private JFormattedTextField		s_SlotText 	 = new JFormattedTextField(timeFormat);
 	/** End Hours Slot 									*/
 	private JLabel					e_SlotLabel	     = new JLabel();
-	private JTextField				e_SlotButton 	 = new JTextField(5);
+	private JFormattedTextField				e_SlotText 	 = new JFormattedTextField(timeFormat);
 	/**	Group Incidence								*/
 	private JLabel 					groupLabel  	 = new JLabel();
 	private JScrollPane 			scrollPane;
@@ -134,14 +132,13 @@ public class VJournalLine extends JournalLine
 	private JDialog 				hour_Dialog;
 	/** Label Title 								*/
 	private JLabel 					title_Label 	 = new JLabel();
-	/**	Time Format Text							*/
-    private Format 					timeFormat		 = DateFormat.getTimeInstance(DateFormat.SHORT);
+
     /**	Date Format Text							*/
     private DateFormat 				dateFormat 		 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	/** Start Slot Hour Label						*/    
     private JLabel 					s_HourLabel 	 = new JLabel();	
     /**	Start Slot Hour								*/
-    private JFormattedTextField 	s_HourText 		 = new JFormattedTextField(timeFormat);
+    private JFormattedTextField		s_HourText 		 = new JFormattedTextField(timeFormat);
     /**  End Slot Hour Label								*/
 	private JLabel 					e_HourLabel		 = new JLabel();
     /**	Start Slot Hour								*/
@@ -171,8 +168,8 @@ public class VJournalLine extends JournalLine
 	/**	Float End Min								*/
 	private float 					fend_Min		 = 0;
 	private int 					aux 			 = 0;
-	
-	private JFormattedTextField ds = new JFormattedTextField(timeFormat);
+	private String[] v_StartHour=null;
+	private String[] v_EndHour=null;
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
@@ -181,23 +178,26 @@ public class VJournalLine extends JournalLine
 		journalLabel.setText(Msg.translate(Env.getCtx(), "Journal"));
 		s_SlotLabel.setText("Inicio Hora Descanso");
 		e_SlotLabel.setText("Fin Hora Descanso");
-		s_SlotButton.setEditable(false);
-		e_SlotButton.setEditable(false);
+		s_SlotText.setPreferredSize(new Dimension(50, 20));
+		e_SlotText.setPreferredSize(new Dimension(50, 20));
+		s_SlotText.setEditable(false);
+		e_SlotText.setEditable(false);
+		s_SlotText.addKeyListener(this);
+		e_SlotText.addKeyListener(this);
 		saveButton.setText(Msg.translate(Env.getCtx(), "Save"));
 		saveButton.addActionListener(this);
-		ds.setPreferredSize(new Dimension(150, 25));
-		ds.setValue(new Date());
+
 		northPanel.add(journalLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0)); 
 		northPanel.add(journalSearch, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
 		northPanel.add(s_SlotLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(s_SlotButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
+		northPanel.add(s_SlotText, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
 		northPanel.add(e_SlotLabel, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
-		northPanel.add(e_SlotButton, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0
+		northPanel.add(e_SlotText, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0
 				,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 5), 0, 0));
 		
 		//	Hour Edit Hours Dialog
@@ -213,11 +213,15 @@ public class VJournalLine extends JournalLine
 		c_HourButton.addActionListener(this);
 		s_HourText.setMaximumSize(new Dimension(4, 10));
 		s_HourText.setPreferredSize(new Dimension(80, 25));	
-		s_HourText.setValue(new Date());
+		s_HourText.setText("0:00");
 		s_HourText.addKeyListener(this);
 		e_HourText.setPreferredSize(new Dimension(80, 25));
-		e_HourText.setValue(new Date());
+		e_HourText.setText("1:00");
+		 v_StartHour = s_HourText.getText().split(":");
+		 v_EndHour = e_HourText.getText().split(":");
 		e_HourText.addKeyListener(this);	
+
+		
         Container editHourPanel = hour_Dialog.getContentPane();
         editHourPanel.setLayout(new GridBagLayout());
         // add element containers
@@ -277,7 +281,7 @@ public class VJournalLine extends JournalLine
 		groupLabel.setMinimumSize(new Dimension(170, 15));
 		groupLabel.setText("Grupos de Incidencias:");
 	
-		for(int i = 0; i < 24; i++){
+		for(int i = 0; i < 24; i++) {
 			JLabel hoursLabel = new JLabel("",JLabel.CENTER);
 			if(i < 10)
 				hoursLabel.setText("0"+ i +":30");
@@ -315,7 +319,7 @@ public class VJournalLine extends JournalLine
 		a_IncidenceButton = new JButton[dataC.length];
 		sliderPanel 	  = new JPanel[dataC.length];
 		hPanel 			  = new JPanel[dataC.length];	
-		for(int i = 0; i < IncidenceButton.length; i++){
+		for(int i = 0; i < IncidenceButton.length; i++) {
 			IncidenceButton[i] = new JButton();
 		}
 		for(int i = 0; i < dataC.length; i++) {
@@ -406,7 +410,7 @@ public class VJournalLine extends JournalLine
 	 *	@author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 24/10/2014, 11:45:16
 	 *  @return void
 	 */
-	public void calculate(){
+	public void calculate() {
 			hour_Dialog.setVisible(false);
 			
 			String hourString = dateFormat.format(s_HourText.getValue());
@@ -440,7 +444,7 @@ public class VJournalLine extends JournalLine
 			Timer timer = new Timer(10, new ActionListener() {
 				   int  num=0;
 				   public void actionPerformed(ActionEvent e) {
-					   if(num <= s_IncideceButton){
+					   if(num <= s_IncideceButton) {
 						   //  Set Size
 						   IncidenceButton[aux].setSize(new Dimension(num,11));
 						   num=num+10;					     	
@@ -450,18 +454,18 @@ public class VJournalLine extends JournalLine
 			timer.start();
 	}
 	
-	public void actionPerformed(ActionEvent e){
+	public void actionPerformed(ActionEvent e) {
 		int count = conceptBox.length;
 		int j = 0; 
-		if(e.getActionCommand().equals(c_HourButton.getText())){
+		if(e.getActionCommand().equals(c_HourButton.getText())) {
 			hour_Dialog.setVisible(false);
 		}
-		if(e.getActionCommand().equals(s_HourButton.getText())){
+		if(e.getActionCommand().equals(s_HourButton.getText())) {
 			calculate();
 	    }
-		for(int i = 0;  i< count; i++){
-			if(conceptBox[i].isSelected()){
-				for(int x = 0; x < t_Button; x++){
+		for(int i = 0;  i< count; i++) {
+			if(conceptBox[i].isSelected()) {
+				for(int x = 0; x < t_Button; x++) {
 					//	Show Incidence Line
 					a_IncidenceButton[i].setVisible(true);
 					if(IncidenceButton[x].getIconTextGap() == i)
@@ -469,7 +473,7 @@ public class VJournalLine extends JournalLine
 				}
 			}
 			else { 
-				for(int x = 0; x < t_Button; x++){
+				for(int x = 0; x < t_Button; x++) {
 					//	Hide Incidence Line
 					a_IncidenceButton[i].setVisible(false);
 					if(IncidenceButton[x].getIconTextGap() == i)
@@ -477,19 +481,19 @@ public class VJournalLine extends JournalLine
 				}
 			}
 		}
-		for(int i = 0;  i < count; i++){
-			if(e.getSource().equals(a_IncidenceButton[i])){
+		for(int i = 0;  i < count; i++) {
+			if(e.getSource().equals(a_IncidenceButton[i])) {
 				addButtonHour(i,t_Button);
 				aux = t_Button-1;
 				hour_Dialog.setVisible(true);	
 			}
 		}
-		if(e.getActionCommand().equals(saveButton.getText())){
+		if(e.getActionCommand().equals(saveButton.getText())) {
 			saveData();
 		}
-		while(true){
+		while(true) {
 			j++;
-			if(t_Button != 0 && e.getActionCommand().equals(IncidenceButton[j-1].getText())){
+			if(t_Button != 0 && e.getActionCommand().equals(IncidenceButton[j-1].getText())) {
 				aux = j-1;
 				hour_Dialog.setVisible(true);	
 				break;
@@ -509,9 +513,9 @@ public class VJournalLine extends JournalLine
 	@Override
 	public void mouseEntered(MouseEvent e) { 
 		int i = 0;
-		while( true ){
+		while( true ) {
 			
-			if(e.getComponent().getName().equals(IncidenceButton[i].getName())){
+			if(e.getComponent().getName().equals(IncidenceButton[i].getName())) {
 				//	Add Border in focus 
 				IncidenceButton[i].setBorder(BorderFactory.createLineBorder(Color.WHITE, 3));
 				break;
@@ -522,9 +526,9 @@ public class VJournalLine extends JournalLine
 	@Override
 	public void mouseExited(MouseEvent e) {   
 		int i = 0;
-		while(true){
+		while(true) {
 			
-			if(e.getComponent().getName().equals(IncidenceButton[i].getName())){
+			if(e.getComponent().getName().equals(IncidenceButton[i].getName())) {
 				//	Remove Border
 				IncidenceButton[i].setBorder(BorderFactory.createLineBorder(new Color(m_RColor, m_GColor, m_BColor), 0));
 				break;
@@ -533,15 +537,18 @@ public class VJournalLine extends JournalLine
 	}	
 	@Override
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
-		if(evt.getSource().equals(journalSearch)){
+		if(evt.getSource().equals(journalSearch)) {
 			m_HR_Journal_ID=(Integer) journalSearch.getValue();
 			//	Get Time Slot Journal Line
 			getTimeSlot(m_HR_Journal_ID,trxName);
 			//	Add Items
 			addItems(m_HR_Journal_ID);
 			m_TimeSlotStart.toString();
-			s_SlotButton.setText(String.valueOf(new Time (m_TimeSlotStart.getTime())));
-			e_SlotButton.setText(String.valueOf(new Time (m_TimeSlotEnd.getTime())));
+			s_SlotText.setValue(m_TimeSlotStart.getTime());
+			e_SlotText.setValue(m_TimeSlotEnd.getTime());
+			s_SlotText.setEditable(true);
+			e_SlotText.setEditable(true);
+
 		}
 	}
 	/**
@@ -549,7 +556,7 @@ public class VJournalLine extends JournalLine
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 14:07:38
 	 * @return void
 	 */
-	public void clearData(){
+	public void clearData() {
 		aux				  = 0;
 		s_IncideceButton  = 0;
 		t_Button  		  = 0;
@@ -564,19 +571,26 @@ public class VJournalLine extends JournalLine
 		m_HR_Concept_ID.clear();
 		m_StartHour.clear();
 		m_EndHour.clear();
+		s_SlotText.setEditable(false);
+		e_SlotText.setEditable(false);
 	}
 	/**
 	 * Save Data
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 02/10/2014, 14:21:57
 	 * @return void
 	 */
-	public void saveData(){
+	public void saveData() {
+		
+		m_StartSlotHour=Timestamp.valueOf("1800-01-01 "+s_SlotText.getText()+":00");
+
+		m_EndSlotHour=Timestamp.valueOf("1800-01-01 "+e_SlotText.getText()+":00");
 		try
 		{
 			Trx.run(new TrxRunnable() 
 			{
 				public void run(String trxName)
-				{
+				{	
+					
 					statusBar.setStatusLine(saveJournalLine(sliderPanel,IncidenceButton,trxName));
 					rightPanel.removeAll();
 					leftPanel.removeAll();
@@ -595,15 +609,109 @@ public class VJournalLine extends JournalLine
 	@Override
 	public void keyTyped(KeyEvent e) {  
 		  //  Key Press
-		  char c = e.getKeyChar();
+		 
 		  //  Check if the key pressed is not a digit
-	      if(((c < '0') || (c > '9')) && (c != '\b' ))
-	      {
+	      if(Character.isLetter(e.getKeyChar())) {
 	         e.consume();  //  ignore keyboard event
+	      }
+	      
+	      if(e.getComponent().equals(s_HourText)) {
+	    	  v_StartHour= s_HourText.getText().split(":");
+	    	  
+	    		  if(v_StartHour[1].length()==2 ) {
+	    			  v_StartHour[0]=v_StartHour[0]+v_StartHour[1].charAt(0);
+		    		  v_StartHour[1]=v_StartHour[1].substring(1,v_StartHour[1].length());
+		    		  if(v_StartHour[0].length()>2 ) {
+		    		  v_StartHour[0]=v_StartHour[0].substring(1,v_StartHour[0].length());
+		    		  }
+		    		  s_HourText.setText(v_StartHour[0]+":"+v_StartHour[1]);
+		    		  if(Integer.parseInt(v_StartHour[0])>23 ) {
+		    			  v_StartHour[0]=v_StartHour[0].substring(0,v_StartHour[0].length()-1);
+		    			  s_HourText.setText("00"+":"+v_StartHour[1]);
+		    			  e.consume();  //  ignore keyboard event
+		    		  }
+		    		  if(Integer.parseInt(v_StartHour[1])>59 ) {
+		    			  v_StartHour[1]=v_StartHour[1].substring(0,v_StartHour[1].length()-1);
+		    			  s_HourText.setText(v_StartHour[0]+":"+"00");
+		    			  e.consume();  //  ignore keyboard event
+		    		  }
+	    		  }
+//	    		  if(v_StartHour[0].length()==2 ) {
+//		    		  v_StartHour[0]=v_StartHour[0].substring(1,v_StartHour[0].length());
+//	    		  }
+	    		 
+	    	  
+	    	  
+	     }
+	      if(e.getComponent().equals(e_HourText)) {
+	    	  v_EndHour= e_HourText.getText().split(":");
+	    	  if(v_EndHour[1].length()==2 ) {
+    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
+	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
+	    		  if(v_EndHour[0].length()>2 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
+	    		  }
+	    		  e_HourText.setText(v_EndHour[0]+":"+v_EndHour[1]);
+	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
+	    			  e_HourText.setText("00"+":"+v_EndHour[1]);
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
+	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
+	    			  e_HourText.setText(v_EndHour[0]+":"+"00");
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    	  }
+	      }
+	      if(e.getComponent().equals(s_SlotText)) {
+	    	  v_EndHour= s_SlotText.getText().split(":");
+	    	  if(v_EndHour[1].length()==2 ) {
+    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
+	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
+	    		  if(v_EndHour[0].length()>2 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
+	    		  }
+	    		  s_SlotText.setText(v_EndHour[0]+":"+v_EndHour[1]);
+	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
+	    			  s_SlotText.setText("00"+":"+v_EndHour[1]);
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
+	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
+	    			  s_SlotText.setText(v_EndHour[0]+":"+"00");
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    	  }
+	      }
+	      if(e.getComponent().equals(e_SlotText)) {
+	    	  v_EndHour= e_SlotText.getText().split(":");
+	    	  if(v_EndHour[1].length()==2 ) {
+    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
+	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
+	    		  if(v_EndHour[0].length()>2 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
+	    		  }
+	    		  e_SlotText.setText(v_EndHour[0]+":"+v_EndHour[1]);
+	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
+	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
+	    			  e_SlotText.setText("00"+":"+v_EndHour[1]);
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
+	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
+	    			  e_SlotText.setText(v_EndHour[0]+":"+"00");
+	    			  e.consume();  //  ignore keyboard event
+	    		  }
+	    	  }
 	      }
 	}
 	@Override
 	public void keyPressed(KeyEvent e) {
+	    if(e.getKeyChar()==KeyEvent.VK_DELETE || e.getKeyChar()==KeyEvent.VK_BACK_SPACE) {
+	         e.consume();  //  ignore keyboard event
+	      }
 	}
 	@Override
 	public void keyReleased(KeyEvent e) {
