@@ -35,6 +35,7 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -168,10 +169,12 @@ public class VJournalLine extends JournalLine
 	/**	Float End Min								*/
 	private float 					fend_Min		 = 0;
 	private int 					aux 			 = 0;
-	private String[] v_StartHour=null;
-	private String[] v_EndHour=null;
-	String prev_Start =null;
-	String prev_End =null;
+	/**	Valid Start Hour							*/
+	private String[] 				v_StartHour		 = null;
+	/**	Valid End Hour								*/
+	private String[] 				v_EndHour		 =null;
+	private String 					prev_Start 		 =null;
+	private String 					prev_End		 =null;
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
@@ -547,8 +550,8 @@ public class VJournalLine extends JournalLine
 			//	Add Items
 			addItems(m_HR_Journal_ID);
 			m_TimeSlotStart.toString();
-			s_SlotText.setValue(m_TimeSlotStart.getTime());
-			e_SlotText.setValue(m_TimeSlotEnd.getTime());
+			s_SlotText.setText(String.valueOf(new Time (m_TimeSlotStart.getTime())));
+			e_SlotText.setText(String.valueOf(new Time (m_TimeSlotEnd.getTime())));
 			s_SlotText.setEditable(true);
 			e_SlotText.setEditable(true);
 
