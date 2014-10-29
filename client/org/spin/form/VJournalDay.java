@@ -168,7 +168,7 @@ public class VJournalDay extends JournalDay
        	rightPanel.setLayout(JournalLayout);
        	rightPanel.add(scrollPane);
        	//  Add Button Save
-     		southPanel.add(saveButton);
+     	southPanel.add(saveButton);
        	//	Add North Panel
        	mainPanel.add(northPanel, BorderLayout.NORTH);
        	//	Add Center Panel
@@ -231,45 +231,6 @@ public class VJournalDay extends JournalDay
 			journalButton[i].setEnabled(status);
 		}
 	}
-	/**
-	 * Add Days of the Month From Calendar
-	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 16:54:22
-	 * @param year
-	 * @param month
-	 * @return void
-	 */
-	public void dayMonth(int year, int month) {
-	    int numberDays = getNumberDays(year, month);
-	    cal.set(year, month-1,1);  
-		startDay = cal.get(Calendar.DAY_OF_WEEK)-1;
-		
-	      dayNumPanel = new JPanel();
-	      dayNumPanel.setPreferredSize(new Dimension(200,120));
-	      dayNumPanel.setLayout(DayLayout);
-	      //  Pad space before the first day of the month
-	      for (int i = 0; i < startDay; i++){
-	    	  JLabel dayMonthLabel = new JLabel();
-	    	  dayMonthLabel.setText("   ");
-	    	  dayNumPanel.add(dayMonthLabel);
-	      }
-	      //  Print days Button
-	      for (int  i = 1; i <= numberDays; i++) {
-	    	  dayButton[count] = new JToggleButton();
-	    	  for(int j=0;j<m_Color.size(); j++){
-	    		  if(dayYear[count].getKey() == day_ID.get(j)){
-	    			  dayButton[count].setBackground(m_Color.get(j));
-	    		  }  
-	    	  }
-	    	  dayButton[count].setText(String.valueOf(i));
-	    	  dayButton[count].setName(String.valueOf(dayYear[count].getKey()));
-	    	  dayButton[count].setBorder(BorderFactory.createEtchedBorder());
-	    	  dayNumPanel.add(dayButton[count]);
-	    	  count++;
-	      } 
-	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, rows+2, 1, 1, 0.0, 0.0
-					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 15), 0, 0));
-	      
-	} //  Day Month
 	
 	/**
 	 * Generate Days of Calendar 
@@ -313,7 +274,51 @@ public class VJournalDay extends JournalDay
 			   dayMonth(m_Year,x);
 			   cols++;	
 			}
+			centerPanel.revalidate();
 	} //  generateDay
+	
+	/**
+	 * Add Days of the Month From Calendar
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 16:54:22
+	 * @param year
+	 * @param month
+	 * @return void
+	 */
+	public void dayMonth(int year, int month) {
+	    cal.set(year, month-1,1); 
+	    int numberDays = cal.getActualMaximum(Calendar.DAY_OF_MONTH);;
+		startDay = cal.get(Calendar.DAY_OF_WEEK)-1;
+		
+	      dayNumPanel = new JPanel();
+	      dayNumPanel.setPreferredSize(new Dimension(200,120));
+	      dayNumPanel.setLayout(DayLayout);
+	      //  Pad space before the first day of the month
+	      for (int i = 0; i < startDay; i++){
+	    	  JLabel dayMonthLabel = new JLabel();
+	    	  dayMonthLabel.setText("");
+	    	  dayNumPanel.add(dayMonthLabel);
+	      }
+	      //  Print days Button
+	      for (int  i = 1; i <= numberDays; i++) {
+	    	  dayButton[count] = new JToggleButton();
+	    	  int j=0;
+	    	  while(j<m_Color.size()){
+	    		  if(dayYear[count].getKey() == day_ID.get(j)){
+	    			  dayButton[count].setBackground(m_Color.get(j));
+	    			  break;
+	    		  }  
+	    		  j++;
+	    	  }
+	    	  dayButton[count].setText(""+i);
+	    	  dayButton[count].setName(""+dayYear[count].getKey());
+	    	  dayButton[count].setBorder(BorderFactory.createEtchedBorder());
+	    	  dayNumPanel.add(dayButton[count]);
+	    	  count++;
+	      } 
+	      centerPanel.add(dayNumPanel,  new GridBagConstraints(cols, rows+2, 1, 1, 0.0, 0.0
+					,GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(5, 0, 5, 15), 0, 0));
+	      
+	} //  Day Month
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -389,10 +394,7 @@ public class VJournalDay extends JournalDay
 	@Override
 	public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
 		Object value = evt.getNewValue();
-		if(evt.getSource().equals(calendarSearch)){
-			//	Get Value Calendar Search
-			m_HR_Calendar_ID = (Integer) calendarSearch.getValue();
-		}
+		
 		//	Load Day of the Year
 		if(evt.getSource().equals(yearSearch)){
 			clearData();
@@ -406,16 +408,20 @@ public class VJournalDay extends JournalDay
 				m_Year = Integer.parseInt(dayYear[0].getName());
 				generateDay();
 			}
-			centerPanel.revalidate();
 		}
 		
 		if(evt.getSource().equals(calendarSearch)){
-			clearData();
+			//	Get Value Calendar Search
+			m_HR_Calendar_ID = (Integer) calendarSearch.getValue();
 			if(m_C_Year_ID != 0){
+				clearData();
+				
+				dayYear 	= getDayYear(m_C_Year_ID);
+		    	getDayColor(m_HR_Calendar_ID,m_C_Year_ID, trxName);
 				//	Generate Day of Month
 				generateDay();
 			}
-			centerPanel.revalidate();
+			
 		} 
 	}
 	/**
@@ -430,6 +436,7 @@ public class VJournalDay extends JournalDay
 		rows	 = 0;
 		centerPanel.removeAll();
 		centerPanel.repaint();
+		dayButton=null;
 		statusJournal(false);
 	}
 	/**
@@ -453,17 +460,6 @@ public class VJournalDay extends JournalDay
 		}
 	}
 	
-	/** 
-	 * 	Get the number of days in a month	 
-	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 15/10/2014, 15:36:20
-	 * @param year
-	 * @param month
-	 * @return
-	 * @return int
-	 */
-	public int getNumberDays(int year, int month) {
-		cal.set(year, month-1, 1);
-		return cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-	}
+	
 		 
 }
