@@ -73,7 +73,7 @@ import org.compiere.util.TrxRunnable;
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>
  *
  */
-public class VJournalLine extends JournalLine 
+public class VJournalLine extends JournalLine
 			implements FormPanel, ChangeListener,ActionListener,MouseListener, VetoableChangeListener, KeyListener  {
 	@Override
 	public void init(int WindowNo, FormFrame frame) {
@@ -170,6 +170,8 @@ public class VJournalLine extends JournalLine
 	private int 					aux 			 = 0;
 	private String[] v_StartHour=null;
 	private String[] v_EndHour=null;
+	String prev_Start =null;
+	String prev_End =null;
 	private void jbInit() {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
@@ -213,7 +215,7 @@ public class VJournalLine extends JournalLine
 		c_HourButton.addActionListener(this);
 		s_HourText.setMaximumSize(new Dimension(4, 10));
 		s_HourText.setPreferredSize(new Dimension(80, 25));	
-		s_HourText.setText("0:00");
+		s_HourText.setText("0:0");
 		s_HourText.addKeyListener(this);
 		e_HourText.setPreferredSize(new Dimension(80, 25));
 		e_HourText.setText("1:00");
@@ -357,6 +359,7 @@ public class VJournalLine extends JournalLine
 		    for(int j = 0; j < dataJL.length; j++) {
 	    		//	Get Start Hour and End Hour
 		    	getSE_Hour(Integer.parseInt(dataJL[j].getID()),trxName);
+		    	m_HR_JournalLine.add(Integer.parseInt(dataJL[j].getID()));
 	    		start_Hour = (((int) m_StartHour.get(cont).getTime() / 3600000) - 4) * s_Hour;
 	    		end_Hour   = (((int) m_EndHour.get(cont).getTime() / 3600000) - 4) * s_Hour;
 	    		fstart_Min = ((((float) m_StartHour.get(cont).getTime() / 3600000) - 4) * s_Hour) - start_Hour;
@@ -616,96 +619,41 @@ public class VJournalLine extends JournalLine
 	      }
 	      
 	      if(e.getComponent().equals(s_HourText)) {
-	    	  v_StartHour= s_HourText.getText().split(":");
-	    	  
-	    		  if(v_StartHour[1].length()==2 ) {
-	    			  v_StartHour[0]=v_StartHour[0]+v_StartHour[1].charAt(0);
-		    		  v_StartHour[1]=v_StartHour[1].substring(1,v_StartHour[1].length());
-		    		  if(v_StartHour[0].length()>2 ) {
-		    		  v_StartHour[0]=v_StartHour[0].substring(1,v_StartHour[0].length());
-		    		  }
-		    		  s_HourText.setText(v_StartHour[0]+":"+v_StartHour[1]);
-		    		  if(Integer.parseInt(v_StartHour[0])>23 ) {
-		    			  v_StartHour[0]=v_StartHour[0].substring(0,v_StartHour[0].length()-1);
-		    			  s_HourText.setText("00"+":"+v_StartHour[1]);
-		    			  e.consume();  //  ignore keyboard event
-		    		  }
-		    		  if(Integer.parseInt(v_StartHour[1])>59 ) {
-		    			  v_StartHour[1]=v_StartHour[1].substring(0,v_StartHour[1].length()-1);
-		    			  s_HourText.setText(v_StartHour[0]+":"+"00");
-		    			  e.consume();  //  ignore keyboard event
-		    		  }
-	    		  }
-//	    		  if(v_StartHour[0].length()==2 ) {
-//		    		  v_StartHour[0]=v_StartHour[0].substring(1,v_StartHour[0].length());
-//	    		  }
-	    		 
-	    	  
-	    	  
-	     }
+	    	  validHour(s_HourText);
+	      }
 	      if(e.getComponent().equals(e_HourText)) {
-	    	  v_EndHour= e_HourText.getText().split(":");
-	    	  if(v_EndHour[1].length()==2 ) {
-    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
-	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
-	    		  if(v_EndHour[0].length()>2 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
-	    		  }
-	    		  e_HourText.setText(v_EndHour[0]+":"+v_EndHour[1]);
-	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
-	    			  e_HourText.setText("00"+":"+v_EndHour[1]);
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
-	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
-	    			  e_HourText.setText(v_EndHour[0]+":"+"00");
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    	  }
+	    	  validHour(e_HourText);
 	      }
 	      if(e.getComponent().equals(s_SlotText)) {
-	    	  v_EndHour= s_SlotText.getText().split(":");
-	    	  if(v_EndHour[1].length()==2 ) {
-    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
-	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
-	    		  if(v_EndHour[0].length()>2 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
-	    		  }
-	    		  s_SlotText.setText(v_EndHour[0]+":"+v_EndHour[1]);
-	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
-	    			  s_SlotText.setText("00"+":"+v_EndHour[1]);
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
-	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
-	    			  s_SlotText.setText(v_EndHour[0]+":"+"00");
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    	  }
+	    	  validHour(s_SlotText);
 	      }
 	      if(e.getComponent().equals(e_SlotText)) {
-	    	  v_EndHour= e_SlotText.getText().split(":");
-	    	  if(v_EndHour[1].length()==2 ) {
-    			  v_EndHour[0]=v_EndHour[0]+v_EndHour[1].charAt(0);
-	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
-	    		  if(v_EndHour[0].length()>2 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(1,v_EndHour[0].length());
-	    		  }
-	    		  e_SlotText.setText(v_EndHour[0]+":"+v_EndHour[1]);
-	    		  if(Integer.parseInt(v_EndHour[0])>23 ) {
-	    			  v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
-	    			  e_SlotText.setText("00"+":"+v_EndHour[1]);
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    		  if(Integer.parseInt(v_EndHour[1])>59 ) {
-	    			  v_EndHour[1]=v_EndHour[1].substring(0,v_EndHour[1].length()-1);
-	    			  e_SlotText.setText(v_EndHour[0]+":"+"00");
-	    			  e.consume();  //  ignore keyboard event
-	    		  }
-	    	  }
+	    	  validHour(e_SlotText);
 	      }
+	}
+	/**
+	 * Valid Hour 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/10/2014, 10:31:12
+	 * @param p_HourText
+	 * @return void
+	 */
+	public void validHour(JFormattedTextField p_HourText){
+		 v_EndHour= p_HourText.getText().split(":");
+		 v_StartHour= p_HourText.getText().split(":");
+   	  	if(prev_Start != v_StartHour[0]) {
+   			 if(v_EndHour[0].length()==3) {
+   				 v_EndHour[0]=v_EndHour[0].substring(0,v_EndHour[0].length()-1);
+   				p_HourText.setText(v_EndHour[0]+":"+v_EndHour[1]);
+   			 }
+	      }
+	      if(prev_End != v_EndHour[1]) {
+	    		  if(v_EndHour[1].length()==3) {
+	    			  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
+	    			  p_HourText.setText(v_EndHour[0]+":"+v_EndHour[1]);
+	    		  }
+	      }
+	      prev_End = v_EndHour[1];
+		  prev_Start = v_EndHour[0];
 	}
 	@Override
 	public void keyPressed(KeyEvent e) {

@@ -70,7 +70,7 @@ public class JournalLine {
 	protected int 					m_count					= 0;
 	protected Timestamp m_StartSlotHour=null;
 	protected Timestamp m_EndSlotHour=null;
-  
+	protected ArrayList<Integer> m_HR_JournalLine=new ArrayList<Integer>();
 	/**
 	 * Get Journal Line Data
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 10:14:44
@@ -254,20 +254,20 @@ public class JournalLine {
 	protected String saveJournalLine( JPanel[] slider, JButton[] hours, String trxName){
 		MHRJournalLine journalLine = null;
 		JOptionPane.showMessageDialog(null, m_EndSlotHour);
-//		MHRJournal journal = null;
-//		journal =new MHRJournal(Env.getCtx(), m_HR_Journal_ID, trxName);
-//		journal.setHR_Journal_ID(m_HR_Journal_ID);
-//		journal.setTimeSlotStart(Timestamp.valueOf(dateFormat.format(m_StartSlotHour)));
-//		journal.setTimeSlotEnd(Timestamp.valueOf(dateFormat.format(m_EndSlotHour)));
-//		journal.saveEx(trxName);
+		MHRJournal journal = null;
+		journal =new MHRJournal(Env.getCtx(), m_HR_Journal_ID, trxName);
+		journal.setHR_Journal_ID(m_HR_Journal_ID);
+		journal.setTimeSlotStart(m_StartSlotHour);
+		journal.setTimeSlotEnd(m_EndSlotHour);
+		journal.saveEx(trxName);
 		for(int i = 0; i < m_HR_Concept_ID.size(); i++){			
-			journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
 			for(int j = 0; j < slider[i].getComponentCount(); j++){					
 				for(int x = 0; x<hours.length; x++){
+					journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
 						//	Set Concept
 						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-						//	Set Journal
+						// 	Set Journal
 					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 						//	Set Start Hour 
 						journalLine.setStartTime(m_StartHour.get(x));

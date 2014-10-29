@@ -103,7 +103,8 @@ public class JournalDay
 	protected ArrayList<Color> getDayColor(int p_HR_Calendar_ID, int p_C_Year_ID, String trxName) {
 		ResultSet 		  rs 	 = null;
 		PreparedStatement pstmt  = null;
-		
+		m_Color.clear();
+		day_ID.clear();
 		try	{
 			pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
 										"FROM HR_JournalDay AS jd " +
@@ -111,7 +112,8 @@ public class JournalDay
 										"INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID = jd.HR_Journal_ID) " +
 										"INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID) " +
 										"INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
-										"WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?", trxName);
+										"WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?" +
+										"GROUP BY jd.HR_Day_ID, j.Red, j.Green, j.Blue", trxName);
 			
 			//	Set HR_Calendar_ID
 			pstmt.setInt(1, p_HR_Calendar_ID);
