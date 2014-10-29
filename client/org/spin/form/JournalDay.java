@@ -59,9 +59,11 @@ public class JournalDay
 	/** Blue Color											*/
 	protected int 					m_BColor				= 0;
 	/**	Logger												*/
-	public static CLogger			log 		= CLogger.getCLogger(JournalDay.class);
-	protected ArrayList<Color>		m_Color = new ArrayList<Color>();
-	protected ArrayList<Integer>	day_ID= new ArrayList<Integer>();
+	public static CLogger			log 					= CLogger.getCLogger(JournalDay.class);
+	/** ColorRGB											*/
+	protected ArrayList<Color>		m_Color 				= new ArrayList<Color>();
+	/** Day ID												*/
+	protected ArrayList<Integer>	m_day_ID				= new ArrayList<Integer>();
 	/** 
 	 * Get Day of Year
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 09:17:23
@@ -74,7 +76,7 @@ public class JournalDay
 		return DB.getKeyNamePairs("SELECT HR_Day_ID, FiscalYear " +
 								  "FROM HR_Day AS d " +
 								  "INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
-								  "WHERE y.C_Year_ID = "+p_HR_Year_ID, false);
+								  "WHERE y.C_Year_ID = "+p_HR_Year_ID+" ORDER BY d.HR_Day_ID", false);
 	}
 
 	/**
@@ -104,7 +106,7 @@ public class JournalDay
 		ResultSet 		  rs 	 = null;
 		PreparedStatement pstmt  = null;
 		m_Color.clear();
-		day_ID.clear();
+		m_day_ID.clear();
 		try	{
 			pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
 										"FROM HR_JournalDay AS jd " +
@@ -113,7 +115,8 @@ public class JournalDay
 										"INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID) " +
 										"INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
 										"WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?" +
-										"GROUP BY jd.HR_Day_ID, j.Red, j.Green, j.Blue", trxName);
+										"GROUP BY jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
+										"ORDER BY jd.HR_Day_ID", trxName);
 			
 			//	Set HR_Calendar_ID
 			pstmt.setInt(1, p_HR_Calendar_ID);
@@ -124,7 +127,7 @@ public class JournalDay
 			
 			while (rs.next()) {
 				m_Color.add(new Color(rs.getInt(2),rs.getInt(3),rs.getInt(4)));
-				day_ID.add(rs.getInt(1));
+				m_day_ID.add(rs.getInt(1));
 		
 			}
 		} 
