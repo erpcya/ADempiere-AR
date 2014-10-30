@@ -23,7 +23,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.compiere.util.CLogger;
@@ -120,8 +119,7 @@ public class JournalLine {
 	 * @return int
 	 */
 	protected int getLineCount(String trxName){
-		MHRJournal journal = new MHRJournal(Env.getCtx(), 0, trxName);
-		return journal.get_ColumnCount();
+		return DB.getSQLValue(trxName, "SELECT COUNT(*) FROM HR_JournalLine");
 	}
 	
 	/**
@@ -267,18 +265,24 @@ public class JournalLine {
 		for(int i = 0; i < m_HR_Concept_ID.size(); i++){			
 			for(int j = 0; j < slider[i].getComponentCount(); j++){					
 				for(int x = 0; x<hours.length; x++){
-					journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);
 					if(slider[i].getComponent(j).getName().equals(hours[x].getName())){
+					if(x >= m_HR_JournalLine.size()){
+						journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);	
+					}
+					else {
+						journalLine = new MHRJournalLine(Env.getCtx(), m_HR_JournalLine.get(x), trxName);
+						journalLine.setHR_JournalLine_ID(m_HR_JournalLine.get(x));
+					}
+						//	Set Journal
+					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);						
 						//	Set Concept
 						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
-						// 	Set Journal
-					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);
 						//	Set Start Hour 
 						journalLine.setStartTime(m_StartHour.get(x));
 						//	Set End Hour
 						journalLine.setEndTime(m_EndHour.get(x));
 						//	Save Data
-						journalLine.saveEx();
+						journalLine.saveEx(trxName);
 					}
 				}
 			}
