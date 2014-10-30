@@ -139,6 +139,12 @@ public class VJournalDay extends JournalDay
 	/** Journal Label			*/
 	private JLabel		    journalLabel	  = new JLabel();
 
+	/**
+	 * Static Init
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/10/2014, 10:29:50
+	 * @throws Exception
+	 * @return void
+	 */
 	private void jbInit() throws Exception {
 		CompiereColor.setBackground(mainPanel);
 		mainPanel.setLayout(mainLayout);
@@ -179,6 +185,12 @@ public class VJournalDay extends JournalDay
 		mainPanel.add(southPanel, BorderLayout.SOUTH);
 	}
 	
+	/**
+	 * Dynamic Init (prepare dynamic fields)
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/10/2014, 10:29:40
+	 * @throws Exception
+	 * @return void
+	 */
 	public void dyInit() throws Exception {
 		//	Get Calendar
 		int AD_Column_ID = 1000167;		//	HR_Calendar.HR_Calendar_ID
@@ -225,6 +237,13 @@ public class VJournalDay extends JournalDay
 		//	Add Journal
 		rightPanel.add(journalPanel);
 	}
+	
+	/**
+	 * Status Journal Button
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 30/10/2014, 10:30:06
+	 * @param status
+	 * @return void
+	 */
 	public void statusJournal(boolean status) {
 		for(int i = 0; i < journalButton.length; i++) {
 			//	Journal Button
