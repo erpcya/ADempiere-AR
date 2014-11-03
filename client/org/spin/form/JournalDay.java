@@ -36,8 +36,7 @@ import org.spin.model.MHRJournalDay;
  * @author victor.perez@e-evolution.com, www.e-evolution.com
  *
  */
-public class JournalDay
-{
+public class JournalDay {
 	/**	Window No											*/
 	public int         				m_WindowNo 				= 0;
 	/**	Calendar											*/
@@ -63,7 +62,12 @@ public class JournalDay
 	/** ColorRGB											*/
 	protected ArrayList<Color>		m_Color 				= new ArrayList<Color>();
 	/** Day ID												*/
-	protected ArrayList<Integer>	m_day_ID				= new ArrayList<Integer>();
+	protected ArrayList<Integer>	m_Day_ID				= new ArrayList<Integer>();
+	/** Day ID												*/
+	protected int 					m_Journal_ID				= 0;
+	/** Day ID												*/
+	protected int 					m_Calendar_ID				= 0;
+
 	/** 
 	 * Get Day of Year
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 09:17:23
@@ -106,7 +110,8 @@ public class JournalDay
 		ResultSet 		  rs 	 = null;
 		PreparedStatement pstmt  = null;
 		m_Color.clear();
-		m_day_ID.clear();
+		m_Day_ID.clear();
+		
 		try	{
 			pstmt = DB.prepareStatement("SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
 										"FROM HR_JournalDay AS jd " +
@@ -117,18 +122,15 @@ public class JournalDay
 										"WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?" +
 										"GROUP BY jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
 										"ORDER BY jd.HR_Day_ID", trxName);
-			
 			//	Set HR_Calendar_ID
 			pstmt.setInt(1, p_HR_Calendar_ID);
 			//	Set C_Year_ID
 			pstmt.setInt(2, p_C_Year_ID);
-			
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {
 				m_Color.add(new Color(rs.getInt(2),rs.getInt(3),rs.getInt(4)));
-				m_day_ID.add(rs.getInt(1));
-		
+				m_Day_ID.add(rs.getInt(1));
 			}
 		} 
 		catch (SQLException e) {
@@ -139,8 +141,7 @@ public class JournalDay
 			    DB.close(rs,pstmt);
 			    rs=null;
 			    pstmt=null;
-			  }
-			
+		}
 		return m_Color;
 	}
 	

@@ -19,6 +19,8 @@ package org.spin.model;
 import java.sql.ResultSet;
 import java.util.Properties;
 
+import org.compiere.util.CCache;
+
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>
  *
@@ -29,7 +31,8 @@ public class MHRJournal extends X_HR_Journal {
 	 * 
 	 */
 	private static final long serialVersionUID = -3794324445051833477L;
-
+	private static CCache<String, MHRJournal> s_cache = new CCache<String, MHRJournal>(Table_Name, 10);
+	
 	/**
 	 * *** Constructor ***
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 15:19:29
@@ -41,7 +44,28 @@ public class MHRJournal extends X_HR_Journal {
 		super(ctx, HR_Journal_ID, trxName);
 		// TODO Auto-generated constructor stub
 	}
-
+	/**
+	 * Get Journal by ID
+	 * @param ctx
+	 * @param HR_Payroll_ID
+	 * @return payroll
+	 */
+	public static MHRJournal get(Properties ctx, int p_HR_Journal_ID) {
+		String key =""+p_HR_Journal_ID;
+		
+		MHRJournal journal = s_cache.get(key);
+		if (journal != null)
+			return journal;
+		//
+		journal = new MHRJournal(ctx, p_HR_Journal_ID, null);
+		if (journal.get_ID() == p_HR_Journal_ID) {
+			s_cache.put(key, journal);
+		}
+		else {
+			journal = null;
+		}
+		return journal;
+	}
 	/**
 	 * *** Constructor ***
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/09/2014, 15:19:29
