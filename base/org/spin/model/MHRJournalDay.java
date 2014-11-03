@@ -16,20 +16,10 @@
  *****************************************************************************/
 package org.spin.model;
 
-import java.awt.Color;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Properties;
-import java.util.logging.Level;
 
-import org.compiere.model.Query;
 import org.compiere.util.CCache;
-import org.compiere.util.CLogger;
-import org.compiere.util.DB;
-import org.compiere.util.Env;
-import org.compiere.util.Util;
-import org.eevolution.model.MHRPayroll;
 
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a>
@@ -41,7 +31,7 @@ public class MHRJournalDay extends X_HR_JournalDay {
 	 * 
 	 */
 	private static final long serialVersionUID = 607784731165038969L;
-
+	private static CCache<String, MHRJournalDay> s_cache = new CCache<String, MHRJournalDay>(Table_Name, 10);
 	/**
 	 * *** Constructor ***
 	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 07/10/2014, 10:02:02
@@ -50,77 +40,34 @@ public class MHRJournalDay extends X_HR_JournalDay {
 	 * @param trxName
 	 */
 	
-	private static CCache<String, MHRJournalDay> s_cacheValue = new CCache<String, MHRJournalDay>(Table_Name+"_Value", 10);
-	private static CCache<String, MHRJournalDay> s_cache = new CCache<String, MHRJournalDay>(Table_Name, 10);
+	
 	public MHRJournalDay(Properties ctx, int HR_JournalDay_ID, String trxName) {
 		super(ctx, HR_JournalDay_ID, trxName);
-		// TODO Auto-generated constructor stub
+		
 	}
-	public static MHRJournalDay get(Properties ctx, int p_HR_Calendar_ID,int p_HR_Year_ID)
-	{
-		CLogger s_log=null;
-		  // check cache
-		String key = "" + p_HR_Calendar_ID + "_" + p_HR_Year_ID;
-	    MHRJournalDay retValue = s_cache.get(key);
-	    if (retValue != null)
-	       return retValue;
-	    
-	    String sql = "SELECT jd.HR_Day_ID, j.Red, j.Green, j.Blue " +
-					 "FROM HR_JournalDay AS jd " +
-					 "INNER JOIN HR_Calendar AS c ON(jd.HR_Calendar_ID = c.HR_Calendar_ID) " +
-					 "INNER JOIN HR_Journal AS j ON(j.HR_Journal_ID = jd.HR_Journal_ID) " +
-					 "INNER JOIN HR_Day AS d ON(d.HR_Day_ID = jd.HR_Day_ID) " +
-					 "INNER JOIN C_Year AS y ON(d.C_Year_ID = y.C_Year_ID) " +
-					 "WHERE c.HR_Calendar_ID = ? AND y.C_Year_ID = ?";
-	    PreparedStatement pstmt = null;
-	       try {
-	            // Create the prepared statement
-	            // Note: when you are querying objects that will be cached it is recommended 
-	            //       to query "outside transaction" (trxName=null), 
-	            //       That's why this kind of static getters does not have trxName parameter
-	            pstmt = DB.prepareStatement (sql, null);
-	            // Fill the parameters
-	            pstmt.setInt(1, p_HR_Calendar_ID);
-	            pstmt.setInt(2, p_HR_Year_ID);
-	            // Execute the query
-	            final ResultSet rs = pstmt.executeQuery ();
-	            // Get the first result if exist
-	            if (rs.next()){
-	               retValue = new MHRJournalDay(ctx, rs, null);
-	            }
-	            // To protect the integrity of your cache check if you get more than one result for your query.
-	            // This situation should be avoided !
-	            // Another quick way to avoid this is using database unique constraints.
-	            if (rs.next()) {
-	               // TODO: do something here: log a warning, throw an exception, set retValue = null etc
-	            }
-	            // Don't forget to close the ResultSet and the PreparedStatement
-	            rs.close ();
-	            pstmt.close ();
-	            pstmt = null;
-	       } catch (SQLException e) {
-	            
-				// handle the SQLException
-	            s_log.log(Level.SEVERE, sql, e);
-	       }
-	       // Don't forget to close the PreparedStatement (again!)
-	       // This situation happens when an exception was thrown in the previous try/catch block
-	       try {
-	            if (pstmt != null){
-	               pstmt.close ();
-	            }
-	            pstmt = null;
-	       } catch (SQLException e)	{
-	            pstmt = null;
-	       }
-	       
-	       // Add the result (if any) to cache
-	       if (retValue != null)
-	            s_cache.put(key, retValue);
-	       
-	       // Finally we are returning the resulting MMaterial object
-	       return retValue;
+	/**
+	 * Get JournalDay by ID
+	 * @param ctx
+	 * @param p_HR_Calendar_ID
+	 * @return p_HR_Journal_ID
+	 */
+	public static MHRJournalDay get(Properties ctx, int p_HR_Calendar_ID, int p_HR_Journal_ID) {
+		String key = p_HR_Calendar_ID+"_"+p_HR_Journal_ID;
+		
+		MHRJournalDay journalDay = s_cache.get(key);
+		if (journalDay != null)
+			return journalDay;
+		
+		journalDay = new MHRJournalDay(ctx, p_HR_Calendar_ID, null);
+		if (journalDay.getHR_Calendar_ID() == p_HR_Calendar_ID) {
+			s_cache.put(key, journalDay);
+		}
+		else {
+			journalDay = null;
+		}
+		return journalDay;
 	}
+	
 	
 	/**
 	 * *** Constructor ***
@@ -134,4 +81,5 @@ public class MHRJournalDay extends X_HR_JournalDay {
 		// TODO Auto-generated constructor stub
 	}
 
+	
 }

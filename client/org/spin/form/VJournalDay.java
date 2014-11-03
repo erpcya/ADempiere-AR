@@ -322,7 +322,7 @@ public class VJournalDay extends JournalDay
 	    	  dayButton[count] = new JToggleButton();
 	    	  int j=0;
 	    	  while(j<m_Color.size()) {
-	    		  if(dayYear[count].getKey() == m_day_ID.get(j)) {
+	    		  if(dayYear[count].getKey() == m_Day_ID.get(j)) {
 	    			  dayButton[count].setBackground(m_Color.get(j));
 	    			  break;
 	    		  }  
