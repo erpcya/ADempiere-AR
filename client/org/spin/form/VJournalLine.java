@@ -581,6 +581,8 @@ public class VJournalLine extends JournalLine
 			prev_End = v_EndHour[1];
 			prev_Start = v_StartHour[0];
 			s_SlotText.setEditable(true);
+			s_SlotText.setSelectionStart(0);
+			s_SlotText.setSelectionEnd(2);
 			e_SlotText.setEditable(true);
 		}
 	}
@@ -638,76 +640,94 @@ public class VJournalLine extends JournalLine
 	
 	@Override
 	public void keyTyped(KeyEvent e) {  
-		int textLength=0;
 		
 		  //  Check if the key pressed is not a digit
 	      if(Character.isLetter(e.getKeyChar())) {
 	         e.consume();  //  ignore keyboard event
 	      }
 	      if(e.getComponent().equals(s_HourText)) {
-//	    	  textLength=s_HourText.getText().length()+1;
-//	    	  if(textLength>5)
-//	    		  e.setKeyChar('\0');
-//	    	  else
-	    		  validHour(s_HourText, e);
+	    	  validTime(s_HourText, e);
+	    			  
 	      }
 	      if(e.getComponent().equals(e_HourText)) {
-//	    	  textLength=e_HourText.getText().length()+1;
-//	    	  if(textLength>5)
-//	    		  e.setKeyChar('\0');
-//	    	  else
-	    		  validHour(e_HourText,e);
+	    	  validTime(e_HourText,e);
+	    		  
 	      }
 	      if(e.getComponent().equals(s_SlotText)) {
-//	    	  textLength=s_SlotText.getText().length()+1;	    	  
-//	    	  if(textLength>5)
-//	    		  e.setKeyChar('\0');
-//	    	  else
-		    	  validHour(s_SlotText,e);
+		  	validTime(s_SlotText, e);
+	  		
+	     
 	      }
 	      if(e.getComponent().equals(e_SlotText)) {
-//	    	  textLength=e_SlotText.getText().length()+1;
-//	    	  if(textLength>5)
-//	    		  e.setKeyChar('\0');
-//	    	  else
-		    	  validHour(e_SlotText,e);
+	    	  validTime(e_SlotText,e);
 	      }
+	      prev_End = v_EndHour[1];
+			prev_Start = v_StartHour[0];
+	}
+	/**
+	 * Valid Time in JFormattedTextField
+	 * @param p_TextHour
+	 * @param e
+	 */
+	void validTime(JFormattedTextField p_TextHour, KeyEvent e){
+		//	Get End Hour in array
+    	v_StartHour= p_TextHour.getText().split(":");
+  		//	Get End Hour in array
+  		v_EndHour= p_TextHour.getText().split(":");
+  		if(p_TextHour.getCaret().getDot()==0){
+  			if(v_StartHour[0].length()>=2) {
+  				if(e.getKeyChar()>'2') {
+  					p_TextHour.setText("0"+e.getKeyChar()+":"+v_EndHour[1]);
+  					e.setKeyChar('\0');
+  					p_TextHour.setSelectionStart(3);
+  					p_TextHour.setSelectionEnd(5);
+  				}
+  				else {
+  					p_TextHour.setText(e.getKeyChar()+":"+v_EndHour[1]);
+  		  			e.setKeyChar('\0');
+  		  		p_TextHour.getCaret().setDot(1);
+  		  		}
+  			}
+  		}
+  		if(v_StartHour[0].equals(p_TextHour.getSelectedText())){
+  			if(e.getKeyChar()>'2'){
+  				p_TextHour.setText("0"+e.getKeyChar()+":"+v_EndHour[1]);
+  				e.setKeyChar('\0');
+  				p_TextHour.setSelectionStart(3);
+  				p_TextHour.setSelectionEnd(5);
+  			}
+  		}
+  		else{
+  			if(prev_Start.equals(v_StartHour[0])) {
+  				if(!v_EndHour[1].equals(p_TextHour.getSelectedText())){
+					if(prev_End.equals(v_EndHour[1])) {
+						if(v_EndHour[1].length()>=2) {
+							e.consume();
+						}
+					}
+					else {
+						if(v_EndHour[1].length()>=2) {
+							e.consume();
+						}
+					}
+  				}
+  			}
+  			else{
+  				if(v_StartHour[0].length()>=2) {
+  					p_TextHour.setSelectionStart(3);
+  					p_TextHour.setSelectionEnd(5);
+  					if(!v_EndHour[1].equals(p_TextHour.getSelectedText())){
+  						if(prev_End.equals(v_EndHour[1])) {
+	  						if(v_EndHour[1].length()>=2) {
+	  							e.consume();
+	  						}
+  						}
+			  		}
+  				}
+  			}
+  		}
 	}
 	
-	/**
-	 * Valid Hour 
-	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 29/10/2014, 10:31:12
-	 * @param p_HourText
-	 * @return void
-	 */
-	public void validHour(JFormattedTextField p_HourText, KeyEvent e) {
-		
-		//	Get Start Hour in array 
-		v_StartHour= p_HourText.getText().split(":");
-		//	Get End Hour in array
-		v_EndHour= p_HourText.getText().split(":");
-		//	Valid hour
-   	  	if(!prev_Start.equals(v_StartHour[0])) {
-   	  		if(v_StartHour[0].length()>=2) {
-   				v_StartHour[0]=v_StartHour[0].substring(0,v_StartHour[0].length()-1);
-   				p_HourText.setText(v_StartHour[0]+":"+v_EndHour[1]);
-   			 }
-   	  		
-	      }
-   	  	//	Valid min
-	    if(prev_End != v_EndHour[1]) {
-	    	  if(v_EndHour[1].length()==3) {
-	    		  v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
-	    		  p_HourText.setText(v_StartHour[0]+":"+v_EndHour[1]);
-	    	  }
-	    	  if(Integer.parseInt(v_EndHour[1])>59) {
-	   			 v_EndHour[1]=v_EndHour[1].substring(1,v_EndHour[1].length());
-	   			p_HourText.setText(v_StartHour[0]+":"+v_EndHour[1]);
-	   		 }
-	    }
-	    prev_End = v_EndHour[1];
-		prev_Start = v_StartHour[0];
-	}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
