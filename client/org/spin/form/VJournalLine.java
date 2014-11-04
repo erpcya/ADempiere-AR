@@ -48,6 +48,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -637,21 +638,39 @@ public class VJournalLine extends JournalLine
 	
 	@Override
 	public void keyTyped(KeyEvent e) {  
+		int textLength=0;
+		
 		  //  Check if the key pressed is not a digit
 	      if(Character.isLetter(e.getKeyChar())) {
 	         e.consume();  //  ignore keyboard event
 	      }
 	      if(e.getComponent().equals(s_HourText)) {
-	    	  validHour(s_HourText);
+//	    	  textLength=s_HourText.getText().length()+1;
+//	    	  if(textLength>5)
+//	    		  e.setKeyChar('\0');
+//	    	  else
+	    		  validHour(s_HourText, e);
 	      }
 	      if(e.getComponent().equals(e_HourText)) {
-	    	  validHour(e_HourText);
+//	    	  textLength=e_HourText.getText().length()+1;
+//	    	  if(textLength>5)
+//	    		  e.setKeyChar('\0');
+//	    	  else
+	    		  validHour(e_HourText,e);
 	      }
 	      if(e.getComponent().equals(s_SlotText)) {
-	    	  validHour(s_SlotText);
+//	    	  textLength=s_SlotText.getText().length()+1;	    	  
+//	    	  if(textLength>5)
+//	    		  e.setKeyChar('\0');
+//	    	  else
+		    	  validHour(s_SlotText,e);
 	      }
 	      if(e.getComponent().equals(e_SlotText)) {
-	    	  validHour(e_SlotText);
+//	    	  textLength=e_SlotText.getText().length()+1;
+//	    	  if(textLength>5)
+//	    		  e.setKeyChar('\0');
+//	    	  else
+		    	  validHour(e_SlotText,e);
 	      }
 	}
 	
@@ -661,17 +680,19 @@ public class VJournalLine extends JournalLine
 	 * @param p_HourText
 	 * @return void
 	 */
-	public void validHour(JFormattedTextField p_HourText) {
+	public void validHour(JFormattedTextField p_HourText, KeyEvent e) {
+		
 		//	Get Start Hour in array 
 		v_StartHour= p_HourText.getText().split(":");
 		//	Get End Hour in array
 		v_EndHour= p_HourText.getText().split(":");
 		//	Valid hour
-   	  	if(prev_Start != v_StartHour[0]) {
-   			 if(v_StartHour[0].length()==3) {
+   	  	if(!prev_Start.equals(v_StartHour[0])) {
+   	  		if(v_StartHour[0].length()>=2) {
    				v_StartHour[0]=v_StartHour[0].substring(0,v_StartHour[0].length()-1);
    				p_HourText.setText(v_StartHour[0]+":"+v_EndHour[1]);
    			 }
+   	  		
 	      }
    	  	//	Valid min
 	    if(prev_End != v_EndHour[1]) {
