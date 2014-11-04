@@ -48,7 +48,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -645,24 +644,29 @@ public class VJournalLine extends JournalLine
 	      if(Character.isLetter(e.getKeyChar())) {
 	         e.consume();  //  ignore keyboard event
 	      }
+	      //  Valid Hour
 	      if(e.getComponent().equals(s_HourText)) {
 	    	  validTime(s_HourText, e);
 	    			  
 	      }
+	      //  Valid Hour
 	      if(e.getComponent().equals(e_HourText)) {
 	    	  validTime(e_HourText,e);
 	    		  
 	      }
+	      //  Valid Hour
 	      if(e.getComponent().equals(s_SlotText)) {
 		  	validTime(s_SlotText, e);
 	  		
 	     
 	      }
+	      //  Valid Hour
 	      if(e.getComponent().equals(e_SlotText)) {
 	    	  validTime(e_SlotText,e);
 	      }
+	      // Asign Value Actual
 	      prev_End = v_EndHour[1];
-			prev_Start = v_StartHour[0];
+		  prev_Start = v_StartHour[0];
 	}
 	/**
 	 * Valid Time in JFormattedTextField
@@ -674,11 +678,14 @@ public class VJournalLine extends JournalLine
     	v_StartHour= p_TextHour.getText().split(":");
   		//	Get End Hour in array
   		v_EndHour= p_TextHour.getText().split(":");
+  		//	Verify the position of dot
   		if(p_TextHour.getCaret().getDot()==0){
   			if(v_StartHour[0].length()>=2) {
+  				//	Valid hour value
   				if(e.getKeyChar()>'2') {
   					p_TextHour.setText("0"+e.getKeyChar()+":"+v_EndHour[1]);
   					e.setKeyChar('\0');
+  					// Selected position final
   					p_TextHour.setSelectionStart(3);
   					p_TextHour.setSelectionEnd(5);
   				}
@@ -689,36 +696,44 @@ public class VJournalLine extends JournalLine
   		  		}
   			}
   		}
+  		// 	Verify the select text from valid Hour
   		if(v_StartHour[0].equals(p_TextHour.getSelectedText())){
   			if(e.getKeyChar()>'2'){
   				p_TextHour.setText("0"+e.getKeyChar()+":"+v_EndHour[1]);
   				e.setKeyChar('\0');
+  				// Selected position final
   				p_TextHour.setSelectionStart(3);
   				p_TextHour.setSelectionEnd(5);
   			}
   		}
   		else{
+  		
   			if(prev_Start.equals(v_StartHour[0])) {
+  				//  Verify the select text from valid Hour
   				if(!v_EndHour[1].equals(p_TextHour.getSelectedText())){
 					if(prev_End.equals(v_EndHour[1])) {
 						if(v_EndHour[1].length()>=2) {
+							//  ignore keyboard event
 							e.consume();
 						}
 					}
 					else {
 						if(v_EndHour[1].length()>=2) {
-							e.consume();
+							//  ignore keyboard event
+							e.consume(); 
 						}
 					}
   				}
   			}
   			else{
   				if(v_StartHour[0].length()>=2) {
+  					// Selected position final
   					p_TextHour.setSelectionStart(3);
   					p_TextHour.setSelectionEnd(5);
   					if(!v_EndHour[1].equals(p_TextHour.getSelectedText())){
   						if(prev_End.equals(v_EndHour[1])) {
 	  						if(v_EndHour[1].length()>=2) {
+	  							//  ignore keyboard event
 	  							e.consume();
 	  						}
   						}
@@ -727,7 +742,6 @@ public class VJournalLine extends JournalLine
   			}
   		}
 	}
-	
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
