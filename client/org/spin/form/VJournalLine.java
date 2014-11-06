@@ -232,7 +232,7 @@ public class VJournalLine extends JournalLine
 		s_HourText.addFocusListener(this);
 		e_HourText.setPreferredSize(new Dimension(80, 25));
 		e_HourText.setText("1:00");
-		 v_StartHour = s_HourText.getText().split(":");
+		v_StartHour = s_HourText.getText().split(":");
 		 v_EndHour = e_HourText.getText().split(":");
 		e_HourText.addKeyListener(this);	
 		
@@ -378,10 +378,12 @@ public class VJournalLine extends JournalLine
 	    		//	Get Start Hour and End Hour
 		    	getSE_Hour(Integer.parseInt(dataJL[j].getID()),trxName);
 		    	m_HR_JournalLine.add(Integer.parseInt(dataJL[j].getID()));
+		    	//  Calculate Time size
 	    		start_Hour = (((int) m_StartHour.get(cont).getTime() / 3600000) - 4) * s_Hour;
 	    		end_Hour   = (((int) m_EndHour.get(cont).getTime() / 3600000) - 4) * s_Hour;
 	    		fstart_Min = ((((float) m_StartHour.get(cont).getTime() / 3600000) - 4) * s_Hour) - start_Hour;
 	    		fend_Min   = ((((float) m_EndHour.get(cont).getTime()   / 3600000) - 4) * s_Hour) - end_Hour;
+	    		// Add button from Incidence
 	    		addButtonHour(i,cont);
 	    		cont++;
 	    	}
@@ -616,7 +618,6 @@ public class VJournalLine extends JournalLine
 	 * @return void
 	 */
 	public void saveData() {
-		
 		m_StartSlotHour=Timestamp.valueOf("1800-01-01 "+s_SlotText.getText()+":00");
 		m_EndSlotHour=Timestamp.valueOf("1800-01-01 "+e_SlotText.getText()+":00");
 		try	{
@@ -639,7 +640,6 @@ public class VJournalLine extends JournalLine
 	
 	@Override
 	public void keyTyped(KeyEvent e) {  
-		
 		  //  Check if the key pressed is not a digit
 	      if(Character.isLetter(e.getKeyChar())) {
 	         e.consume();  //  ignore keyboard event
@@ -647,18 +647,14 @@ public class VJournalLine extends JournalLine
 	      //  Valid Hour
 	      if(e.getComponent().equals(s_HourText)) {
 	    	  validTime(s_HourText, e);
-	    			  
 	      }
 	      //  Valid Hour
 	      if(e.getComponent().equals(e_HourText)) {
 	    	  validTime(e_HourText,e);
-	    		  
 	      }
 	      //  Valid Hour
 	      if(e.getComponent().equals(s_SlotText)) {
 		  	validTime(s_SlotText, e);
-	  		
-	     
 	      }
 	      //  Valid Hour
 	      if(e.getComponent().equals(e_SlotText)) {
@@ -668,6 +664,7 @@ public class VJournalLine extends JournalLine
 	      prev_End = v_EndHour[1];
 		  prev_Start = v_StartHour[0];
 	}
+
 	/**
 	 * Valid Time in JFormattedTextField
 	 * @param p_TextHour
@@ -707,7 +704,6 @@ public class VJournalLine extends JournalLine
   			}
   		}
   		else{
-  		
   			if(prev_Start.equals(v_StartHour[0])) {
   				//  Verify the select text from valid Hour
   				if(!v_EndHour[1].equals(p_TextHour.getSelectedText())){
