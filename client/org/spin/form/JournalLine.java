@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -31,6 +32,7 @@ import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.spin.model.MHRJournal;
 import org.spin.model.MHRJournalLine;
+import org.zkoss.zul.Div;
 
 /**
  * @author <a href="mailto:raulmunozn@gmail.com">Raul MuÃ±oz</a>
@@ -289,5 +291,49 @@ public class JournalLine {
 		}
 		 return "Save";
 	}
-	
+	/**
+	 * Save Journal Line Data
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 21/10/2014, 10:59:46
+	 * @param slider
+	 * @param hours
+	 * @param trxName
+	 * @return
+	 * @return String
+	 */
+	protected String wSaveJournalLine( Div[] slider, Div[] hours, String trxName){
+		MHRJournalLine journalLine = null;
+		MHRJournal journal = null;
+		journal =new MHRJournal(Env.getCtx(), m_HR_Journal_ID, trxName);
+		journal.setHR_Journal_ID(m_HR_Journal_ID);
+		journal.setTimeSlotStart(m_StartSlotHour);
+		journal.setTimeSlotEnd(m_EndSlotHour);
+		journal.saveEx(trxName);
+		for(int i = 0; i < m_HR_Concept_ID.size(); i++){
+			List listSlider = slider[i].getChildren();
+			for(int j = 0; j < listSlider.size(); j++){					
+				for(int x = 0; x<hours.length; x++){
+					if(listSlider.get(j).equals(hours[x])){
+					if(x >= m_HR_JournalLine.size()){
+						journalLine = new MHRJournalLine(Env.getCtx(), 0, trxName);	
+					}
+					else {
+						journalLine = new MHRJournalLine(Env.getCtx(), m_HR_JournalLine.get(x), trxName);
+						journalLine.setHR_JournalLine_ID(m_HR_JournalLine.get(x));
+					}
+						//	Set Journal
+					 	journalLine.setHR_Journal_ID(m_HR_Journal_ID);						
+						//	Set Concept
+						journalLine.setHR_Concept_ID(m_HR_Concept_ID.get(i));
+						//	Set Start Hour 
+						journalLine.setStartTime(m_StartHour.get(x));
+						//	Set End Hour
+						journalLine.setEndTime(m_EndHour.get(x));
+						//	Save Data
+						journalLine.saveEx(trxName);
+					}
+				}
+			}
+		}
+		 return "Save";
+	}
 }

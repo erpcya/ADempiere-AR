@@ -214,4 +214,32 @@ public class JournalDay {
 		}
 		 return "Save";
 	}
+	/**
+	 * Web Save Calendar Data 
+	 * @author <a href="mailto:raulmunozn@gmail.com">Raul Muñoz</a> 20/10/2014, 17:24:37
+	 * @param p_HR_Calendar_ID
+	 * @param p_journalButton
+	 * @param p_dayButton
+	 * @param trxName
+	 * @return
+	 * @return String
+	 */
+	protected String wSaveCalendar(String[] p_journalName,String[] p_journalStyle,String[] p_dayName, String[] p_dayStyle, String trxName) {
+		for(int j = 0; j < p_journalName.length; j++) {
+			for(int i = 0; i < p_dayName.length; i++) { 
+				if(p_dayStyle[i].equals(p_journalStyle[j])) {
+					MHRJournalDay journalDay = new MHRJournalDay(Env.getCtx(), 0, trxName);
+					//	Set Calendar
+					journalDay.setHR_Calendar_ID(m_HR_Calendar_ID);
+					//	Set Day
+					journalDay.setHR_Day_ID(Integer.parseInt(p_dayName[i]));
+					//	Set Journal
+					journalDay.setHR_Journal_ID(Integer.parseInt(p_journalName[j]));
+					//	Save Data
+					journalDay.saveEx();
+				}
+			}
+		}
+		 return "Save";
+	}
 }
